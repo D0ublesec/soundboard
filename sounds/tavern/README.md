@@ -1,3 +1,4 @@
 # Sounds: tavern
 
-Place MP3 files for the tavern category here.
+Credits:
+My Tavern 1.wav by ralexpdx -- https://freesound.org/s/321220/ -- License: Attribution 4.0
