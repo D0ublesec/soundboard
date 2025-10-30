@@ -72,23 +72,23 @@
         Favorites
     </h2>
         <div class="w-full flex flex-wrap gap-2 p-2 bg-slate-800/40 border border-slate-700 rounded-xl">
-        <button onclick="expandAll()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-full text-sm md:text-base transition-colors shadow-sm active:scale-[0.98]">
+        <button onclick="expandAll()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm md:text-base transition-all shadow-sm active:scale-[0.98] bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500">
             <span class="text-base">⬇️</span>
             <span>Expand</span>
         </button>
-        <button onclick="collapseAll()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 rounded-full text-sm md:text-base transition-colors shadow-sm active:scale-[0.98]">
+        <button onclick="collapseAll()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm md:text-base transition-all shadow-sm active:scale-[0.98] bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500">
             <span class="text-base">⬆️</span>
             <span>Collapse</span>
         </button>
-        <button onclick="clearAllFavorites()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-full text-sm md:text-base transition-colors shadow-sm active:scale-[0.98]">
+        <button onclick="clearAllFavorites()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm md:text-base transition-all shadow-sm active:scale-[0.98] bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500">
             <svg class="w-4 h-4 md:w-5 md:h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             <span>Clear</span>
         </button>
-        <button onclick="openPresetModal()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-full text-sm md:text-base transition-colors shadow-sm active:scale-[0.98]">
+        <button onclick="openPresetModal()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm md:text-base transition-all shadow-sm active:scale-[0.98] bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500">
             <span class="text-base">🎛️</span>
             <span>Presets</span>
         </button>
-            <button onclick="openSearchModal()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-full text-sm md:text-base transition-colors shadow-sm active:scale-[0.98]">
+            <button onclick="openSearchModal()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm md:text-base transition-all shadow-sm active:scale-[0.98] bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500">
                 <span class="text-base">🔎</span>
                 <span>Search</span>
             </button>
@@ -110,7 +110,10 @@
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                 Active Sounds (<span id="active-count">0</span>)
             </span>
-            <button onclick="clearAllActiveSounds()" class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm transition-colors">Clear All</button>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleActiveBarSize()" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-sm transition-colors" id="activebar-size-btn">Expand</button>
+                <button onclick="clearAllActiveSounds()" class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm transition-colors">Clear All</button>
+            </div>
         </h3>
         <div id="active-sounds-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-48 overflow-y-auto"></div>
     </div>
@@ -425,6 +428,8 @@ let audioElements = {};
 let favorites = JSON.parse(localStorage.getItem('soundboard-favorites') || '[]');
 let expandedCategories = JSON.parse(localStorage.getItem('soundboard-expanded') || '["Tavern & Inn"]'); // First category expanded by default
 let activeTab = JSON.parse(localStorage.getItem('soundboard-activeTab') || 'null') || Object.keys(soundLibrary)[0];
+const DUCK_FACTOR = 0.3;
+let activeBarExpanded = JSON.parse(localStorage.getItem('soundboard-activeBarExpanded') || 'false');
 
 // Preset definitions: curated lists of sound ids
 const presets = {
@@ -552,7 +557,7 @@ function performSearch(query) {
             <span class="text-xl">${sound.icon}</span>
             <div class="flex-1 min-w-0">
                 <div class="text-sm font-medium truncate">${sound.name}</div>
-                <div class="text-xs text-slate-400 truncate">${category}</div>
+                <div class="text-xs text-slate-400 truncate">${category} • ${getTagsDisplay(sound.name, category)}</div>
             </div>
         </button>
     `).join('');
@@ -721,7 +726,10 @@ audio.addEventListener('timeupdate', () => {
                 icon: icon,
                 isPlaying: true,
                 loop: false,
-                volume: 0.7
+                volume: 0.7,
+                smartMix: false,
+                duckApplied: false,
+                originalVolume: undefined
             };
             audio.volume = 0.7;
         } else {
@@ -729,6 +737,7 @@ audio.addEventListener('timeupdate', () => {
             activeSounds[soundId].isPlaying = true;
         }
     }
+    updateDucking();
     render();
 }
 
@@ -754,6 +763,29 @@ function setLoopBeforePlay(soundId, soundName, url, category, icon) {
     render();
 }
 
+function setSmartMixBeforePlay(soundId, soundName, url, category, icon) {
+    if (!activeSounds[soundId]) {
+        activeSounds[soundId] = {
+            name: soundName,
+            url: url,
+            category: category,
+            icon: icon,
+            isPlaying: false,
+            loop: false,
+            volume: 0.7,
+            smartMix: true,
+            duckApplied: false,
+            originalVolume: undefined
+        };
+        const audio = getAudioElement(soundId, url, false);
+        audio.volume = 0.7;
+    } else {
+        toggleSmartMix(soundId);
+    }
+    updateDucking();
+    render();
+}
+
         // Stop Sound
         function stopSound(soundId) {
             const audio = audioElements[soundId];
@@ -762,6 +794,7 @@ function setLoopBeforePlay(soundId, soundName, url, category, icon) {
                 audio.currentTime = 0;
             }
             delete activeSounds[soundId];
+            updateDucking();
             render();
         }
 
@@ -786,6 +819,40 @@ function setLoopBeforePlay(soundId, soundName, url, category, icon) {
             //render();
         }
 
+        function toggleSmartMix(soundId) {
+            if (!activeSounds[soundId]) return;
+            activeSounds[soundId].smartMix = !activeSounds[soundId].smartMix;
+            updateDucking();
+            render();
+        }
+
+        function updateDucking() {
+            // Find if any priority (smartMix) sound is currently playing
+            const priorityIds = Object.entries(activeSounds)
+                .filter(([_, s]) => s.isPlaying && s.smartMix)
+                .map(([id]) => id);
+            const hasPriority = priorityIds.length > 0;
+            Object.entries(activeSounds).forEach(([id, s]) => {
+                const audio = audioElements[id];
+                if (!audio) return;
+                if (hasPriority && !s.smartMix && s.isPlaying) {
+                    if (!s.duckApplied) {
+                        s.originalVolume = s.volume;
+                        const newVol = Math.max(0, Math.min(1, s.volume * DUCK_FACTOR));
+                        s.volume = newVol;
+                        audio.volume = newVol;
+                        s.duckApplied = true;
+                    }
+                } else if (s.duckApplied) {
+                    const restore = s.originalVolume != null ? s.originalVolume : s.volume;
+                    s.volume = restore;
+                    audio.volume = restore;
+                    s.originalVolume = undefined;
+                    s.duckApplied = false;
+                }
+            });
+        }
+
         function clearAllActiveSounds() {
             Object.keys(activeSounds).forEach(soundId => {
                 const audio = audioElements[soundId];
@@ -795,6 +862,12 @@ function setLoopBeforePlay(soundId, soundName, url, category, icon) {
                 }
                 delete activeSounds[soundId];
             });
+            render();
+        }
+
+        function toggleActiveBarSize() {
+            activeBarExpanded = !activeBarExpanded;
+            localStorage.setItem('soundboard-activeBarExpanded', JSON.stringify(activeBarExpanded));
             render();
         }
 
@@ -820,6 +893,22 @@ function setLoopBeforePlay(soundId, soundName, url, category, icon) {
         // Check if Favorite
         function isFavorite(soundId) {
             return favorites.some(f => f.id === soundId);
+        }
+
+        function getTags(soundName, category) {
+            const tags = [];
+            const name = (soundName || '').toLowerCase();
+            const cat = (category || '').toLowerCase();
+            if (/ambience|ambient|hum|stream|waves|wind|crowd/.test(name) || /forest|dungeon|ocean|city|tavern|ambience/.test(cat)) tags.push('ambient');
+            if (/scream|impact|slam|clap|gong|glass|break|trap|door/.test(name)) tags.push('event');
+            if (/loop|ambience|hum|rain|waves|wind|music/.test(name)) tags.push('loop');
+            if (/whisper|breath|quiet|soft/.test(name)) tags.push('subtle');
+            if (/dragon|zombie|ghost|skeleton|troll|goblin|spider/.test(name) || /creatures/.test(cat)) tags.push('creature');
+            return tags;
+        }
+
+        function getTagsDisplay(soundName, category) {
+            return getTags(soundName, category).join(', ');
         }
 
         // Switch Tab
@@ -879,6 +968,10 @@ const categoriesHtml = Object.keys(soundLibrary).map(category => {
                                 <div class="flex flex-col items-center mb-2 pt-4">
                                     <span class="text-3xl mb-1">${sound.icon}</span>
                                     <h3 class="font-medium text-center text-xs leading-tight">${sound.name}</h3>
+                                    ${isActive?.isPlaying ? '<div class="mt-1 flex gap-1"><span class="w-1.5 h-2 bg-green-400 animate-pulse"></span><span class="w-1.5 h-3 bg-green-300 animate-pulse"></span><span class="w-1.5 h-2 bg-green-400 animate-pulse"></span></div>' : ''}
+                                    <div class="mt-1 flex flex-wrap justify-center gap-1">
+                                        ${getTags(sound.name, category).map(t => `<span class=\"px-1.5 py-0.5 rounded-full text-[10px] bg-slate-700 text-slate-300\">${t}</span>`).join('')}
+                                    </div>
                                 </div>
                                 <button onclick="playSound('${sound.id}', '${sound.name}', '${sound.url}', '${category}', '${sound.icon}')" 
                                     class="w-full px-2 py-1.5 rounded text-xs font-medium transition-all flex items-center justify-center gap-1 ${
@@ -894,7 +987,15 @@ const categoriesHtml = Object.keys(soundLibrary).map(category => {
                                             ? 'bg-blue-600 hover:bg-blue-700' 
                                             : 'bg-slate-700 hover:bg-slate-600'
                                     }">
-                                    ${isActive?.loop ? '🔁' : '▶️'}
+                                    ${isActive?.loop ? '🔁 Looping' : '↻ Loop Off'}
+                                </button>
+                                <button onclick="${isActive ? `toggleSmartMix('${sound.id}')` : `setSmartMixBeforePlay('${sound.id}', '${sound.name}', '${sound.url}', '${category}', '${sound.icon}')`}" 
+                                    class="w-full mt-1 px-2 py-1 rounded text-xs font-medium transition-all flex items-center justify-center gap-1 ${
+                                        isActive?.smartMix 
+                                            ? 'bg-pink-600 hover:bg-pink-700' 
+                                            : 'bg-slate-700 hover:bg-slate-600'
+                                    }">
+                                    ${isActive?.smartMix ? '🎚️ Priority' : '🎚️ Normal'}
                                 </button>
                             </div>
                         `;
@@ -939,6 +1040,19 @@ const activeBar = document.getElementById('active-sounds-bar');
 if (activeSoundsCount > 0) {
     activeBar.classList.remove('hidden');
     document.getElementById('active-count').textContent = activeSoundsCount;
+    // Adjust size
+    const gridEl = document.getElementById('active-sounds-grid');
+    const sizeBtn = document.getElementById('activebar-size-btn');
+    if (gridEl) {
+        if (activeBarExpanded) {
+            gridEl.style.maxHeight = '50vh';
+        } else {
+            gridEl.style.maxHeight = '12rem';
+        }
+    }
+    if (sizeBtn) {
+        sizeBtn.textContent = activeBarExpanded ? 'Collapse' : 'Expand';
+    }
     const activeHtml = playingEntries.map(([soundId, sound]) => `
         <div class="bg-slate-800 rounded-lg p-3 flex items-center gap-3">
             <span class="text-xl flex-shrink-0">${sound.icon}</span>
@@ -960,6 +1074,7 @@ if (activeSoundsCount > 0) {
                 </div>
             </div>
             <div class="flex gap-1 flex-shrink-0">
+                <button onclick="toggleSmartMix('${soundId}')" class="px-2 py-1 text-[10px] rounded ${sound.smartMix ? 'bg-pink-600 hover:bg-pink-700 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'}" title="Toggle priority smart mix">${sound.smartMix ? 'Priority' : 'Normal'}</button>
                 <button onclick="toggleLoop('${soundId}')" 
                     class="p-2 rounded transition-colors ${sound.loop ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-700 hover:bg-slate-600'}" 
                     title="${sound.loop ? 'Looping' : 'Play once'}">
