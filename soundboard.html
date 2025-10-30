@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Board Game Soundboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide-static/0.263.1/lucide.min.css">
+    <style>
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-track {
+            height: 4px;
+            border-radius: 2px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgb(168, 85, 247);
+            cursor: pointer;
+            margin-top: -6px;
+        }
+        input[type="range"]::-moz-range-track {
+            height: 4px;
+            border-radius: 2px;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgb(168, 85, 247);
+            cursor: pointer;
+            border: none;
+        }
+        .icon {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            vertical-align: middle;
+        }
+	.time-display {
+    	    font-size: 0.75rem;
+    	    color: rgb(148, 163, 184);
+	}
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+    <div class="container mx-auto px-4 py-8 pb-32">
+        <h1 class="text-4xl font-bold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+            Board Game Soundboard
+        </h1>
+
+        <!-- Favorites Section -->
+        <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+    <h2 class="text-xl font-semibold flex items-center gap-2">
+        <svg class="w-5 h-5 fill-yellow-400 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        Favorites
+    </h2>
+    <div class="flex gap-2">
+        <button onclick="expandAll()" class="flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm transition-colors">
+            ⬇️ Expand All
+        </button>
+        <button onclick="collapseAll()" class="flex items-center gap-1 px-3 py-1 bg-slate-600 hover:bg-slate-700 rounded text-sm transition-colors">
+            ⬆️ Collapse All
+        </button>
+        <button onclick="clearAllFavorites()" class="flex items-center gap-1 px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm transition-colors">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Clear All
+                </button>
+            </div>
+            <div id="favorites-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"></div>
+        </div>
+
+<!-- Expandable Categories -->
+<div id="categories-container"></div>
+
+        <!-- Sound Grid -->
+        <div id="sound-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"></div>
+    </div>
+
+    <!-- Active Sounds Bar -->
+    <div id="active-sounds-bar" class="hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur border-t border-purple-500/30 p-4 shadow-lg">
+        <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            Active Sounds (<span id="active-count">0</span>)
+        </h3>
+        <div id="active-sounds-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-48 overflow-y-auto"></div>
+    </div>
+
+    <script>
+        // Icons as SVG strings
+        const icons = {
+            music: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>',
+            zap: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>',
+            cloud: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>',
+            skull: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle><path d="M8 20v2h8v-2"></path><path d="M12.5 17H11"></path><path d="M13 17v-2"></path><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"></path></svg>',
+            play: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
+            pause: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>',
+            square: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>',
+            repeat: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>',
+            repeat1: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path><path d="M11 10h1v4"></path></svg>',
+            volume: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>',
+            star: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
+            starFilled: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
+            x: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+        };
+
+        // Sound Library Configuration - EDIT THIS TO ADD/REMOVE SOUNDS
+        const soundLibrary = {
+    'Tavern & Inn': [
+        { id: 'tavern-crowd', name: 'Tavern Crowd', url: '/sounds/tavern/crowd.mp3', icon: '🍺' },
+        { id: 'tavern-music', name: 'Lute Music', url: '/sounds/tavern/lute.mp3', icon: '🎵' },
+        { id: 'fireplace', name: 'Fireplace Crackle', url: '/sounds/tavern/fireplace.mp3', icon: '🔥' },
+        { id: 'pouring-ale', name: 'Pouring Ale', url: '/sounds/tavern/ale.mp3', icon: '🍻' },
+        { id: 'dice-roll', name: 'Dice on Table', url: '/sounds/tavern/dice.mp3', icon: '🎲' },
+        { id: 'chair-scrape', name: 'Chair Scraping', url: '/sounds/tavern/chair.mp3', icon: '🪑' },
+    ],
+    
+    'Combat & Battle': [
+        { id: 'sword-clash', name: 'Sword Clash', url: '/sounds/combat/sword-clash.mp3', icon: '⚔️' },
+        { id: 'sword-swing', name: 'Sword Swing', url: '/sounds/combat/swing.mp3', icon: '🗡️' },
+        { id: 'arrow-shot', name: 'Arrow Release', url: '/sounds/combat/arrow.mp3', icon: '🏹' },
+        { id: 'shield-block', name: 'Shield Block', url: '/sounds/combat/shield.mp3', icon: '🛡️' },
+        { id: 'battle-cry', name: 'Battle Cry', url: '/sounds/combat/cry.mp3', icon: '😤' },
+        { id: 'armor-clank', name: 'Armor Clank', url: '/sounds/combat/armor.mp3', icon: '🦾' },
+        { id: 'crossbow', name: 'Crossbow Shot', url: '/sounds/combat/crossbow.mp3', icon: '🎯' },
+        { id: 'punch', name: 'Punch Impact', url: '/sounds/combat/punch.mp3', icon: '👊' },
+    ],
+    
+    'Magic & Spells': [
+        { id: 'fireball', name: 'Fireball', url: '/sounds/magic/fireball.mp3', icon: '🔥' },
+        { id: 'ice-spell', name: 'Ice Spell', url: '/sounds/magic/ice.mp3', icon: '❄️' },
+        { id: 'lightning', name: 'Lightning Bolt', url: '/sounds/magic/lightning.mp3', icon: '⚡' },
+        { id: 'heal-spell', name: 'Healing Spell', url: '/sounds/magic/heal.mp3', icon: '✨' },
+        { id: 'teleport', name: 'Teleport', url: '/sounds/magic/teleport.mp3', icon: '💫' },
+        { id: 'magic-shield', name: 'Magic Shield', url: '/sounds/magic/shield.mp3', icon: '🔮' },
+        { id: 'enchant', name: 'Enchantment', url: '/sounds/magic/enchant.mp3', icon: '✴️' },
+        { id: 'dark-magic', name: 'Dark Magic', url: '/sounds/magic/dark.mp3', icon: '🌑' },
+    ],
+    
+    'Dungeon & Cave': [
+        { id: 'dungeon-ambience', name: 'Dungeon Ambience', url: '/sounds/dungeon/ambience.mp3', icon: '🏰' },
+        { id: 'water-drip', name: 'Water Dripping', url: '/sounds/dungeon/drip.mp3', icon: '💧' },
+        { id: 'chains', name: 'Rattling Chains', url: '/sounds/dungeon/chains.mp3', icon: '⛓️' },
+        { id: 'stone-door', name: 'Stone Door', url: '/sounds/dungeon/stone-door.mp3', icon: '🚪' },
+        { id: 'torch', name: 'Torch Burning', url: '/sounds/dungeon/torch.mp3', icon: '🔦' },
+        { id: 'echo-steps', name: 'Echoing Steps', url: '/sounds/dungeon/echo.mp3', icon: '👣' },
+        { id: 'trap-trigger', name: 'Trap Triggered', url: '/sounds/dungeon/trap.mp3', icon: '⚠️' },
+    ],
+    
+    'Forest & Nature': [
+        { id: 'forest-ambience', name: 'Forest Ambience', url: '/sounds/forest/ambience.mp3', icon: '🌲' },
+        { id: 'birds', name: 'Bird Calls', url: '/sounds/forest/birds.mp3', icon: '🐦' },
+        { id: 'stream', name: 'Babbling Stream', url: '/sounds/forest/stream.mp3', icon: '🌊' },
+        { id: 'wind-leaves', name: 'Wind in Leaves', url: '/sounds/forest/wind.mp3', icon: '🍃' },
+        { id: 'owl', name: 'Owl Hoot', url: '/sounds/forest/owl.mp3', icon: '🦉' },
+        { id: 'rustling', name: 'Bush Rustling', url: '/sounds/forest/rustle.mp3', icon: '🌿' },
+        { id: 'crickets', name: 'Night Crickets', url: '/sounds/forest/crickets.mp3', icon: '🦗' },
+    ],
+    
+    'Creatures & Monsters': [
+        { id: 'dragon-roar', name: 'Dragon Roar', url: '/sounds/creatures/dragon.mp3', icon: '🐉' },
+        { id: 'wolf-howl', name: 'Wolf Howl', url: '/sounds/creatures/wolf.mp3', icon: '🐺' },
+        { id: 'zombie', name: 'Zombie Groan', url: '/sounds/creatures/zombie.mp3', icon: '🧟' },
+        { id: 'skeleton', name: 'Skeleton Rattle', url: '/sounds/creatures/skeleton.mp3', icon: '💀' },
+        { id: 'ghost', name: 'Ghost Wail', url: '/sounds/creatures/ghost.mp3', icon: '👻' },
+        { id: 'goblin', name: 'Goblin Screech', url: '/sounds/creatures/goblin.mp3', icon: '👺' },
+        { id: 'troll', name: 'Troll Growl', url: '/sounds/creatures/troll.mp3', icon: '👹' },
+        { id: 'spider', name: 'Giant Spider', url: '/sounds/creatures/spider.mp3', icon: '🕷️' },
+        { id: 'bat-swarm', name: 'Bat Swarm', url: '/sounds/creatures/bats.mp3', icon: '🦇' },
+        { id: 'snake-hiss', name: 'Snake Hiss', url: '/sounds/creatures/snake.mp3', icon: '🐍' },
+    ],
+    
+    'Weather & Elements': [
+        { id: 'rain-light', name: 'Light Rain', url: '/sounds/weather/light-rain.mp3', icon: '🌧️' },
+        { id: 'rain-heavy', name: 'Heavy Rainstorm', url: '/sounds/weather/heavy-rain.mp3', icon: '⛈️' },
+        { id: 'thunder', name: 'Thunder Clap', url: '/sounds/weather/thunder.mp3', icon: '⚡' },
+        { id: 'wind-gentle', name: 'Gentle Breeze', url: '/sounds/weather/breeze.mp3', icon: '💨' },
+        { id: 'wind-storm', name: 'Windstorm', url: '/sounds/weather/windstorm.mp3', icon: '🌪️' },
+        { id: 'snow', name: 'Snowstorm', url: '/sounds/weather/snow.mp3', icon: '❄️' },
+        { id: 'fog', name: 'Eerie Fog', url: '/sounds/weather/fog.mp3', icon: '🌫️' },
+    ],
+    
+    'City & Town': [
+        { id: 'marketplace', name: 'Marketplace', url: '/sounds/city/market.mp3', icon: '🏪' },
+        { id: 'town-square', name: 'Town Square', url: '/sounds/city/square.mp3', icon: '🏛️' },
+        { id: 'bell-tower', name: 'Church Bells', url: '/sounds/city/bells.mp3', icon: '🔔' },
+        { id: 'harbor', name: 'Harbor Docks', url: '/sounds/city/harbor.mp3', icon: '⚓' },
+        { id: 'blacksmith', name: 'Blacksmith', url: '/sounds/city/blacksmith.mp3', icon: '⚒️' },
+        { id: 'crowd', name: 'City Crowd', url: '/sounds/city/crowd.mp3', icon: '👥' },
+        { id: 'horse-cart', name: 'Horse Cart', url: '/sounds/city/cart.mp3', icon: '🐴' },
+    ],
+    
+    'Ocean & Sea': [
+        { id: 'ocean-waves', name: 'Ocean Waves', url: '/sounds/ocean/waves.mp3', icon: '🌊' },
+        { id: 'seagulls', name: 'Seagulls', url: '/sounds/ocean/seagulls.mp3', icon: '🦅' },
+        { id: 'ship-creak', name: 'Ship Creaking', url: '/sounds/ocean/ship.mp3', icon: '⛵' },
+        { id: 'underwater', name: 'Underwater', url: '/sounds/ocean/underwater.mp3', icon: '🌀' },
+        { id: 'whale', name: 'Whale Song', url: '/sounds/ocean/whale.mp3', icon: '🐋' },
+        { id: 'storm-at-sea', name: 'Storm at Sea', url: '/sounds/ocean/storm.mp3', icon: '🌊' },
+    ],
+    
+    'Items & Objects': [
+        { id: 'coins', name: 'Coins Jingling', url: '/sounds/items/coins.mp3', icon: '💰' },
+        { id: 'chest-open', name: 'Chest Opening', url: '/sounds/items/chest.mp3', icon: '📦' },
+        { id: 'key-turn', name: 'Key in Lock', url: '/sounds/items/key.mp3', icon: '🔑' },
+        { id: 'potion-drink', name: 'Drinking Potion', url: '/sounds/items/potion.mp3', icon: '🧪' },
+        { id: 'page-turn', name: 'Page Turning', url: '/sounds/items/page.mp3', icon: '📖' },
+        { id: 'quill-write', name: 'Quill Writing', url: '/sounds/items/quill.mp3', icon: '🪶' },
+        { id: 'glass-break', name: 'Glass Breaking', url: '/sounds/items/glass.mp3', icon: '💥' },
+        { id: 'bag-drop', name: 'Heavy Bag Drop', url: '/sounds/items/bag.mp3', icon: '🎒' },
+    ],
+    
+    'Doors & Movement': [
+        { id: 'door-creak', name: 'Door Creaking', url: '/sounds/doors/creak.mp3', icon: '🚪' },
+        { id: 'door-slam', name: 'Door Slam', url: '/sounds/doors/slam.mp3', icon: '💥' },
+        { id: 'footsteps-wood', name: 'Footsteps on Wood', url: '/sounds/doors/wood-steps.mp3', icon: '👣' },
+        { id: 'footsteps-stone', name: 'Footsteps on Stone', url: '/sounds/doors/stone-steps.mp3', icon: '🦶' },
+        { id: 'running', name: 'Running Footsteps', url: '/sounds/doors/running.mp3', icon: '🏃' },
+        { id: 'stairs', name: 'Climbing Stairs', url: '/sounds/doors/stairs.mp3', icon: '🪜' },
+    ],
+    
+    'Horror & Suspense': [
+        { id: 'heartbeat', name: 'Heartbeat', url: '/sounds/horror/heartbeat.mp3', icon: '❤️' },
+        { id: 'whispers', name: 'Eerie Whispers', url: '/sounds/horror/whispers.mp3', icon: '👤' },
+        { id: 'scream', name: 'Scream', url: '/sounds/horror/scream.mp3', icon: '😱' },
+        { id: 'creepy-laugh', name: 'Creepy Laugh', url: '/sounds/horror/laugh.mp3', icon: '😈' },
+        { id: 'clock-ticking', name: 'Clock Ticking', url: '/sounds/horror/clock.mp3', icon: '⏰' },
+        { id: 'music-box', name: 'Creepy Music Box', url: '/sounds/horror/music-box.mp3', icon: '🎵' },
+    ],
+    
+    'Sci-Fi & Futuristic': [
+        { id: 'laser-shot', name: 'Laser Shot', url: '/sounds/scifi/laser.mp3', icon: '🔫' },
+        { id: 'spaceship', name: 'Spaceship Hum', url: '/sounds/scifi/ship.mp3', icon: '🚀' },
+        { id: 'robot', name: 'Robot Beeps', url: '/sounds/scifi/robot.mp3', icon: '🤖' },
+        { id: 'alarm', name: 'Red Alert', url: '/sounds/scifi/alarm.mp3', icon: '🚨' },
+        { id: 'teleporter', name: 'Teleporter', url: '/sounds/scifi/teleport.mp3', icon: '✨' },
+        { id: 'computer', name: 'Computer Beeps', url: '/sounds/scifi/computer.mp3', icon: '💻' },
+    ],
+    
+    'Victory & Defeat': [
+        { id: 'victory-fanfare', name: 'Victory Fanfare', url: '/sounds/victory/fanfare.mp3', icon: '🎺' },
+        { id: 'level-up', name: 'Level Up', url: '/sounds/victory/levelup.mp3', icon: '⬆️' },
+        { id: 'achievement', name: 'Achievement', url: '/sounds/victory/achievement.mp3', icon: '🏆' },
+        { id: 'defeat', name: 'Defeat', url: '/sounds/victory/defeat.mp3', icon: '💀' },
+        { id: 'cheer', name: 'Crowd Cheering', url: '/sounds/victory/cheer.mp3', icon: '🎉' },
+    ],
+};
+
+const categoryIcons = {
+    'Tavern & Inn': '🍺',
+    'Combat & Battle': '⚔️',
+    'Magic & Spells': '✨',
+    'Dungeon & Cave': '🏰',
+    'Forest & Nature': '🌲',
+    'Creatures & Monsters': '🐉',
+    'Weather & Elements': '🌧️',
+    'City & Town': '🏛️',
+    'Ocean & Sea': '🌊',
+    'Items & Objects': '💰',
+    'Doors & Movement': '🚪',
+    'Horror & Suspense': '😱',
+    'Sci-Fi & Futuristic': '🚀',
+    'Victory & Defeat': '🏆',
+};
+
+        // State Management
+        let activeSounds = {};
+let audioElements = {};
+let favorites = JSON.parse(localStorage.getItem('soundboard-favorites') || '[]');
+let expandedCategories = JSON.parse(localStorage.getItem('soundboard-expanded') || '["Tavern & Inn"]'); // First category expanded by default
+
+function toggleCategory(category) {
+    const index = expandedCategories.indexOf(category);
+    if (index >= 0) {
+        expandedCategories.splice(index, 1);
+    } else {
+        expandedCategories.push(category);
+    }
+    localStorage.setItem('soundboard-expanded', JSON.stringify(expandedCategories));
+    render();
+}
+
+function expandAll() {
+    expandedCategories = Object.keys(soundLibrary);
+    localStorage.setItem('soundboard-expanded', JSON.stringify(expandedCategories));
+    render();
+}
+
+function collapseAll() {
+    expandedCategories = [];
+    localStorage.setItem('soundboard-expanded', JSON.stringify(expandedCategories));
+    render();
+}
+
+function favoriteCategory(category) {
+    const sounds = soundLibrary[category];
+    sounds.forEach(sound => {
+        if (!isFavorite(sound.id)) {
+            favorites.push({ 
+                id: sound.id, 
+                name: sound.name, 
+                url: sound.url, 
+                category: category, 
+                icon: sound.icon 
+            });
+        }
+    });
+    localStorage.setItem('soundboard-favorites', JSON.stringify(favorites));
+    render();
+}
+
+        // Initialize Audio Element
+        function getAudioElement(soundId, url, loop = false) {
+    if (!audioElements[soundId]) {
+        const audio = new Audio(url);
+        audio.loop = loop;
+        audio.addEventListener('ended', () => {
+            if (!audio.loop) {
+                stopSound(soundId);
+            }
+        });
+        let lastRenderTime = 0;
+audio.addEventListener('timeupdate', () => {
+    if (activeSounds[soundId]) {
+        activeSounds[soundId].currentTime = audio.currentTime;
+        activeSounds[soundId].duration = audio.duration;
+        // Only render once per second to reduce flickering
+        const now = Date.now();
+        if (now - lastRenderTime > 1000) {
+            lastRenderTime = now;
+            render();
+        }
+    }
+});
+        audio.addEventListener('loadedmetadata', () => {
+            if (activeSounds[soundId]) {
+                activeSounds[soundId].duration = audio.duration;
+                render();
+            }
+        });
+        audioElements[soundId] = audio;
+    }
+    return audioElements[soundId];
+}
+
+        // Play/Pause Sound
+        function playSound(soundId, soundName, url, category, icon) {
+    // Check if sound is already in activeSounds (paused or stopped)
+    const sound = activeSounds[soundId];
+    const loop = sound ? sound.loop : false;
+    const audio = getAudioElement(soundId, url, loop);
+    
+    if (sound && sound.isPlaying) {
+        audio.pause();
+        activeSounds[soundId].isPlaying = false;
+    } else {
+        audio.play();
+        if (!activeSounds[soundId]) {
+            // First time playing this sound
+            activeSounds[soundId] = {
+                name: soundName,
+                url: url,
+                category: category,
+                icon: icon,
+                isPlaying: true,
+                loop: false,
+                volume: 0.7
+            };
+            audio.volume = 0.7;
+        } else {
+            // Resuming a paused sound
+            activeSounds[soundId].isPlaying = true;
+        }
+    }
+    render();
+}
+
+function setLoopBeforePlay(soundId, soundName, url, category, icon) {
+    if (!activeSounds[soundId]) {
+        // Sound hasn't been played yet, add it to activeSounds with loop enabled
+        activeSounds[soundId] = {
+            name: soundName,
+            url: url,
+            category: category,
+            icon: icon,
+            isPlaying: false,
+            loop: true,
+            volume: 0.7
+        };
+        // Pre-initialize audio with loop
+        const audio = getAudioElement(soundId, url, true);
+        audio.volume = 0.7;
+    } else {
+        // Sound already exists, just toggle loop
+        toggleLoop(soundId);
+    }
+    render();
+}
+
+        // Stop Sound
+        function stopSound(soundId) {
+            const audio = audioElements[soundId];
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+            delete activeSounds[soundId];
+            render();
+        }
+
+        // Toggle Loop
+        function toggleLoop(soundId) {
+            const audio = audioElements[soundId];
+            const newLoop = !activeSounds[soundId].loop;
+            if (audio) {
+                audio.loop = newLoop;
+            }
+            activeSounds[soundId].loop = newLoop;
+            render();
+        }
+
+        // Set Volume
+        function setVolume(soundId, volume) {
+            const audio = audioElements[soundId];
+            if (audio) {
+                audio.volume = volume;
+            }
+            activeSounds[soundId].volume = volume;
+            //render();
+        }
+
+        // Toggle Favorite
+        function toggleFavorite(soundId, soundName, url, category, icon) {
+            const index = favorites.findIndex(f => f.id === soundId);
+            if (index >= 0) {
+                favorites.splice(index, 1);
+            } else {
+                favorites.push({ id: soundId, name: soundName, url: url, category: category, icon: icon });
+            }
+            localStorage.setItem('soundboard-favorites', JSON.stringify(favorites));
+            render();
+        }
+
+        // Clear All Favorites
+        function clearAllFavorites() {
+            favorites = [];
+            localStorage.setItem('soundboard-favorites', JSON.stringify(favorites));
+            render();
+        }
+
+        // Check if Favorite
+        function isFavorite(soundId) {
+            return favorites.some(f => f.id === soundId);
+        }
+
+        // Switch Tab
+        function switchTab(category) {
+            activeTab = category;
+            render();
+        }
+
+	// Format time in MM:SS
+function formatTime(seconds) {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+        // Render UI
+        function render() {
+            
+// Render Expandable Categories
+const categoriesHtml = Object.keys(soundLibrary).map(category => {
+    const isExpanded = expandedCategories.includes(category);
+    const sounds = soundLibrary[category];
+    
+    return `
+        <div class="mb-4 bg-slate-800/30 backdrop-blur rounded-lg border border-slate-700 overflow-hidden">
+            <div class="flex items-center">
+    <button onclick="toggleCategory('${category}')" 
+        class="flex-1 px-4 py-4 flex items-center justify-between hover:bg-slate-700/50 transition-colors">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">${categoryIcons[category]}</span>
+            <span class="font-semibold text-lg">${category}</span>
+            <span class="text-sm text-slate-400">(${sounds.length})</span>
+        </div>
+        <span class="text-2xl transform transition-transform ${isExpanded ? 'rotate-180' : ''}">${isExpanded ? '▲' : '▼'}</span>
+    </button>
+    <button onclick="event.stopPropagation(); favoriteCategory('${category}')" 
+        class="px-4 py-4 hover:bg-slate-700/50 transition-colors border-l border-slate-700" 
+        title="Favorite all in this category">
+        <span class="text-xl">⭐</span>
+    </button>
+</div>
+            
+            ${isExpanded ? `
+                <div class="p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 border-t border-slate-700">
+                    ${sounds.map(sound => {
+                        const isActive = activeSounds[sound.id];
+                        const favorite = isFavorite(sound.id);
+                        return `
+                            <div class="relative bg-slate-800/50 rounded-lg p-3 border border-slate-700 hover:border-purple-500 transition-all">
+                                <button onclick="toggleFavorite('${sound.id}', '${sound.name}', '${sound.url}', '${category}', '${sound.icon}')" 
+                                    class="absolute top-1 right-1 p-1 hover:bg-slate-700 rounded transition-colors z-10">
+                                    <span class="block text-sm">${favorite ? '⭐' : '☆'}</span>
+                                </button>
+                                <div class="flex flex-col items-center mb-2 pt-4">
+                                    <span class="text-3xl mb-1">${sound.icon}</span>
+                                    <h3 class="font-medium text-center text-xs leading-tight">${sound.name}</h3>
+                                </div>
+                                <button onclick="playSound('${sound.id}', '${sound.name}', '${sound.url}', '${category}', '${sound.icon}')" 
+                                    class="w-full px-2 py-1.5 rounded text-xs font-medium transition-all flex items-center justify-center gap-1 ${
+                                        isActive?.isPlaying 
+                                            ? 'bg-green-600 hover:bg-green-700' 
+                                            : 'bg-purple-600 hover:bg-purple-700'
+                                    }">
+                                    ${isActive?.isPlaying ? '⏸️' : '▶️'}
+                                </button>
+                                <button onclick="${isActive ? `toggleLoop('${sound.id}')` : `setLoopBeforePlay('${sound.id}', '${sound.name}', '${sound.url}', '${category}', '${sound.icon}')`}" 
+                                    class="w-full mt-1 px-2 py-1 rounded text-xs font-medium transition-all flex items-center justify-center gap-1 ${
+                                        isActive?.loop 
+                                            ? 'bg-blue-600 hover:bg-blue-700' 
+                                            : 'bg-slate-700 hover:bg-slate-600'
+                                    }">
+                                    ${isActive?.loop ? '🔁' : '▶️'}
+                                </button>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            ` : ''}
+        </div>
+    `;
+}).join('');
+
+document.getElementById('categories-container').innerHTML = categoriesHtml;
+
+            // Render Favorites
+            const favSection = document.getElementById('favorites-section');
+            if (favorites.length > 0) {
+                favSection.classList.remove('hidden');
+                const favHtml = favorites.map(sound => {
+                    const isActive = activeSounds[sound.id]?.isPlaying;
+                    return `
+                        <div class="relative">
+                            <button onclick="playSound('${sound.id}', '${sound.name}', '${sound.url}', '${sound.category}', '${sound.icon}')" 
+                                class="w-full px-3 py-4 rounded-lg font-medium transition-all flex flex-col items-center gap-2 ${
+                                    isActive 
+                                        ? 'bg-gradient-to-r from-green-600 to-emerald-600 shadow-lg shadow-green-500/50' 
+                                        : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500'
+                                }">
+                                <span class="text-2xl">${sound.icon}</span>
+                                <span class="text-sm text-center">${sound.name}</span>
+                            </button>
+                            <button onclick="toggleFavorite('${sound.id}', '${sound.name}', '${sound.url}', '${sound.category}', '${sound.icon}')" 
+                                class="absolute -top-2 -right-2 p-1 bg-slate-700 hover:bg-slate-600 rounded-full transition-colors">
+                                <span class="w-4 h-4 block">${icons.x}</span>
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+                document.getElementById('favorites-grid').innerHTML = favHtml;
+            } else {
+                favSection.classList.add('hidden');
+            }
+
+            // Render Sound Grid
+            const soundsHtml = soundLibrary[activeTab].map(sound => {
+                const isActive = activeSounds[sound.id];
+                const favorite = isFavorite(sound.id);
+                return `
+                    <div class="relative bg-slate-800/30 backdrop-blur rounded-lg p-4 border border-slate-700 hover:border-purple-500 transition-all">
+                        <button onclick="toggleFavorite('${sound.id}', '${sound.name}', '${sound.url}', '${activeTab}', '${sound.icon}')" 
+                            class="absolute top-2 right-2 p-1 hover:bg-slate-700 rounded transition-colors z-10">
+                            <span class="w-5 h-5 block ${favorite ? 'text-yellow-400' : 'text-slate-500'}">${favorite ? icons.starFilled : icons.star}</span>
+                        </button>
+                        <div class="flex flex-col items-center mb-3 pt-6">
+                            <span class="text-5xl mb-2">${sound.icon}</span>
+                            <h3 class="font-medium text-center text-sm">${sound.name}</h3>
+                        </div>
+                        <button onclick="playSound('${sound.id}', '${sound.name}', '${sound.url}', '${activeTab}', '${sound.icon}')" 
+    class="w-full px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+        isActive?.isPlaying 
+            ? 'bg-green-600 hover:bg-green-700' 
+            : 'bg-purple-600 hover:bg-purple-700'
+    }">
+    <span class="w-4 h-4">${isActive?.isPlaying ? icons.pause : icons.play}</span>
+    ${isActive?.isPlaying ? 'Pause' : 'Play'}
+</button>
+<button onclick="${isActive ? `toggleLoop('${sound.id}')` : `setLoopBeforePlay('${sound.id}', '${sound.name}', '${sound.url}', '${activeTab}', '${sound.icon}')`}" 
+    class="w-full mt-2 px-3 py-1 rounded text-xs font-medium transition-all flex items-center justify-center gap-1 ${
+        isActive?.loop 
+            ? 'bg-blue-600 hover:bg-blue-700' 
+            : 'bg-slate-700 hover:bg-slate-600'
+    }">
+    <span class="w-3 h-3">${isActive?.loop ? icons.repeat : icons.repeat1}</span>
+    ${isActive?.loop ? 'Looping' : 'Play Once'}
+</button>
+                       
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('sound-grid').innerHTML = soundsHtml;
+
+            // Render Active Sounds (this should already be there at the end of render function)
+const activeSoundsCount = Object.keys(activeSounds).length;
+const activeBar = document.getElementById('active-sounds-bar');
+if (activeSoundsCount > 0) {
+    activeBar.classList.remove('hidden');
+    document.getElementById('active-count').textContent = activeSoundsCount;
+    const activeHtml = Object.entries(activeSounds).map(([soundId, sound]) => `
+        <div class="bg-slate-800 rounded-lg p-3 flex items-center gap-3">
+            <span class="text-xl flex-shrink-0">${sound.icon}</span>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-1">
+                    <div class="font-medium text-sm truncate">${sound.name}</div>
+                    <div class="time-display ml-2 flex-shrink-0">
+                        ${formatTime(sound.currentTime || 0)} / ${formatTime(sound.duration || 0)}
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-4 h-4 text-purple-400 flex-shrink-0">${icons.volume}</span>
+                    <input type="range" min="0" max="1" step="0.01" value="${sound.volume}" 
+                        oninput="setVolume('${soundId}', parseFloat(this.value)); event.stopPropagation();"
+                        onmouseup="render()"
+                        class="flex-1 h-1 rounded-lg appearance-none cursor-pointer"
+                        style="background: linear-gradient(to right, rgb(168, 85, 247) 0%, rgb(168, 85, 247) ${sound.volume * 100}%, rgb(51, 65, 85) ${sound.volume * 100}%, rgb(51, 65, 85) 100%)" />
+                    <span class="text-xs text-slate-400 w-8 flex-shrink-0">${Math.round(sound.volume * 100)}%</span>
+                </div>
+            </div>
+            <div class="flex gap-1 flex-shrink-0">
+                <button onclick="toggleLoop('${soundId}')" 
+                    class="p-2 rounded transition-colors ${sound.loop ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-700 hover:bg-slate-600'}" 
+                    title="${sound.loop ? 'Looping' : 'Play once'}">
+                    <span class="w-4 h-4 block">${sound.loop ? icons.repeat : icons.repeat1}</span>
+                </button>
+                <button onclick="playSound('${soundId}', '${sound.name}', '${sound.url}', '${sound.category}', '${sound.icon}')" 
+                    class="p-2 bg-slate-700 hover:bg-slate-600 rounded transition-colors">
+                    <span class="w-4 h-4 block">${sound.isPlaying ? icons.pause : icons.play}</span>
+                </button>
+                <button onclick="stopSound('${soundId}')" 
+                    class="p-2 bg-red-600 hover:bg-red-700 rounded transition-colors">
+                    <span class="w-4 h-4 block">${icons.square}</span>
+                </button>
+            </div>
+        </div>
+    `).join('');
+    document.getElementById('active-sounds-grid').innerHTML = activeHtml;
+} else {
+    activeBar.classList.add('hidden');
+}
+        }
+
+        // Initial Render
+        render();
+    </script>
+</body>
+</html>
