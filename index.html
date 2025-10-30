@@ -122,7 +122,7 @@ body.light-mode {
                 </button>
     </div>
             </div>
-            <div id="favorites-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"></div>
+            <div id="favorites-grid" class="grid grid-cols-6 sm:grid-cols-6 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-2"></div>
         </div>
 
 <!-- Expandable Categories -->
@@ -327,7 +327,10 @@ body.light-mode {
         { id: 'bard-song', name: 'Bard Song', url: '/sounds/tavern/bard.mp3', icon: '🎤' },
         { id: 'murmur-low', name: 'Low Murmurs', url: '/sounds/tavern/murmur.mp3', icon: '🗣️' },
         { id: 'mug-clink', name: 'Mugs Clinking', url: '/sounds/tavern/mugs.mp3', icon: '🍺' },
-        { id: 'fiddle-tune', name: 'Fiddle Tune', url: '/sounds/tavern/fiddle.mp3', icon: '🎻' }
+        { id: 'fiddle-tune', name: 'Fiddle Tune', url: '/sounds/tavern/fiddle.mp3', icon: '🎻' },
+        { id: 'plate-clatter', name: 'Plates Clattering', url: '/sounds/tavern/plates.mp3', icon: '🍽️' },
+        { id: 'tavern-cheer', name: 'Tavern Cheer', url: '/sounds/tavern/cheer.mp3', icon: '🥂' },
+        { id: 'door-open-tavern', name: 'Door Opens', url: '/sounds/tavern/door.mp3', icon: '🚪' }
     ],
     
     'Combat & Battle': [
@@ -340,7 +343,10 @@ body.light-mode {
         { id: 'crossbow', name: 'Crossbow Shot', url: '/sounds/combat/crossbow.mp3', icon: '🎯' },
         { id: 'punch', name: 'Punch Impact', url: '/sounds/combat/punch.mp3', icon: '👊' },
         { id: 'spell-impact', name: 'Spell Impact', url: '/sounds/combat/spell-impact.mp3', icon: '✨' },
-        { id: 'war-drum', name: 'War Drums', url: '/sounds/combat/drums.mp3', icon: '🥁' }
+        { id: 'war-drum', name: 'War Drums', url: '/sounds/combat/drums.mp3', icon: '🥁' },
+        { id: 'spear-thrust', name: 'Spear Thrust', url: '/sounds/combat/spear.mp3', icon: '🗡️' },
+        { id: 'bow-draw', name: 'Bow Draw', url: '/sounds/combat/bow-draw.mp3', icon: '🏹' },
+        { id: 'shield-drop', name: 'Shield Drop', url: '/sounds/combat/shield-drop.mp3', icon: '🛡️' }
     ],
     
     'Magic & Spells': [
@@ -353,7 +359,9 @@ body.light-mode {
         { id: 'enchant', name: 'Enchantment', url: '/sounds/magic/enchant.mp3', icon: '✴️' },
         { id: 'dark-magic', name: 'Dark Magic', url: '/sounds/magic/dark.mp3', icon: '🌑' },
         { id: 'chaos-surge', name: 'Chaos Surge', url: '/sounds/magic/chaos.mp3', icon: '🌀' },
-        { id: 'whisper-ritual', name: 'Whispered Ritual', url: '/sounds/magic/ritual-whisper.mp3', icon: '🗝️' }
+        { id: 'whisper-ritual', name: 'Whispered Ritual', url: '/sounds/magic/ritual-whisper.mp3', icon: '🗝️' },
+        { id: 'summon', name: 'Summoning', url: '/sounds/magic/summon.mp3', icon: '🧿' },
+        { id: 'dispel', name: 'Dispel Magic', url: '/sounds/magic/dispel.mp3', icon: '🌀' }
     ],
     
     'Dungeon & Cave': [
@@ -366,7 +374,9 @@ body.light-mode {
         { id: 'trap-trigger', name: 'Trap Triggered', url: '/sounds/dungeon/trap.mp3', icon: '⚠️' },
         { id: 'cave-in', name: 'Cave-In Rumble', url: '/sounds/dungeon/cavein.mp3', icon: '🪨' },
         { id: 'door-iron', name: 'Iron Gate', url: '/sounds/dungeon/iron-gate.mp3', icon: '🗝️' },
-        { id: 'torch-extinguish', name: 'Torch Extinguish', url: '/sounds/dungeon/torch-out.mp3', icon: '🕯️' }
+        { id: 'torch-extinguish', name: 'Torch Extinguish', url: '/sounds/dungeon/torch-out.mp3', icon: '🕯️' },
+        { id: 'rat-scurries', name: 'Rats Scurrying', url: '/sounds/dungeon/rats.mp3', icon: '🐀' },
+        { id: 'pickaxe', name: 'Pickaxe Strikes', url: '/sounds/dungeon/pickaxe.mp3', icon: '⛏️' }
     ],
     
     'Forest & Nature': [
@@ -378,7 +388,9 @@ body.light-mode {
         { id: 'rustling', name: 'Bush Rustling', url: '/sounds/forest/rustle.mp3', icon: '🌿' },
         { id: 'crickets', name: 'Night Crickets', url: '/sounds/forest/crickets.mp3', icon: '🦗' },
         { id: 'squirrel', name: 'Squirrel Chatter', url: '/sounds/forest/squirrel.mp3', icon: '🐿️' },
-        { id: 'bees', name: 'Bees Nearby', url: '/sounds/forest/bees.mp3', icon: '🐝' }
+        { id: 'bees', name: 'Bees Nearby', url: '/sounds/forest/bees.mp3', icon: '🐝' },
+        { id: 'thunderbirds', name: 'Distant Thunderbirds', url: '/sounds/forest/thunderbirds.mp3', icon: '🦅' },
+        { id: 'deer', name: 'Deer Rustle', url: '/sounds/forest/deer.mp3', icon: '🦌' }
     ],
     
     'Creatures & Monsters': [
@@ -393,7 +405,9 @@ body.light-mode {
         { id: 'bat-swarm', name: 'Bat Swarm', url: '/sounds/creatures/bats.mp3', icon: '🦇' },
         { id: 'snake-hiss', name: 'Snake Hiss', url: '/sounds/creatures/snake.mp3', icon: '🐍' },
         { id: 'rat-squeak', name: 'Rat Squeaks', url: '/sounds/creatures/rats.mp3', icon: '🐀' },
-        { id: 'slime', name: 'Slime Squish', url: '/sounds/creatures/slime.mp3', icon: '🫧' }
+        { id: 'slime', name: 'Slime Squish', url: '/sounds/creatures/slime.mp3', icon: '🫧' },
+        { id: 'ogre', name: 'Ogre Roar', url: '/sounds/creatures/ogre.mp3', icon: '🧌' },
+        { id: 'witch', name: 'Witch Cackle', url: '/sounds/creatures/witch.mp3', icon: '🧙' }
     ],
     
     'Weather & Elements': [
@@ -404,7 +418,9 @@ body.light-mode {
         { id: 'wind-storm', name: 'Windstorm', url: '/sounds/weather/windstorm.mp3', icon: '🌪️' },
         { id: 'snow', name: 'Snowstorm', url: '/sounds/weather/snow.mp3', icon: '❄️' },
         { id: 'fog', name: 'Eerie Fog', url: '/sounds/weather/fog.mp3', icon: '🌫️' },
-        { id: 'hail', name: 'Hail', url: '/sounds/weather/hail.mp3', icon: '🧊' }
+        { id: 'hail', name: 'Hail', url: '/sounds/weather/hail.mp3', icon: '🧊' },
+        { id: 'distant-wind', name: 'Distant Wind', url: '/sounds/weather/distant-wind.mp3', icon: '🌬️' },
+        { id: 'earthquake', name: 'Earthquake Rumble', url: '/sounds/weather/earthquake.mp3', icon: '🌎' }
     ],
     
     'City & Town': [
@@ -416,7 +432,9 @@ body.light-mode {
         { id: 'crowd', name: 'City Crowd', url: '/sounds/city/crowd.mp3', icon: '👥' },
         { id: 'horse-cart', name: 'Horse Cart', url: '/sounds/city/cart.mp3', icon: '🐴' },
         { id: 'guard-halt', name: 'Guard: Halt!', url: '/sounds/city/guard.mp3', icon: '🛡️' },
-        { id: 'town-crier', name: 'Town Crier', url: '/sounds/city/crier.mp3', icon: '📣' }
+        { id: 'town-crier', name: 'Town Crier', url: '/sounds/city/crier.mp3', icon: '📣' },
+        { id: 'market-haggle', name: 'Haggling', url: '/sounds/city/haggle.mp3', icon: '🗣️' },
+        { id: 'cart-wheels', name: 'Cart Wheels', url: '/sounds/city/wheels.mp3', icon: '🛞' }
     ],
     
     'Ocean & Sea': [
@@ -426,7 +444,9 @@ body.light-mode {
         { id: 'underwater', name: 'Underwater', url: '/sounds/ocean/underwater.mp3', icon: '🌀' },
         { id: 'whale', name: 'Whale Song', url: '/sounds/ocean/whale.mp3', icon: '🐋' },
         { id: 'storm-at-sea', name: 'Storm at Sea', url: '/sounds/ocean/storm.mp3', icon: '🌊' },
-        { id: 'rigging', name: 'Rigging and Ropes', url: '/sounds/ocean/rigging.mp3', icon: '🪢' }
+        { id: 'rigging', name: 'Rigging and Ropes', url: '/sounds/ocean/rigging.mp3', icon: '🪢' },
+        { id: 'deck-steps', name: 'Deck Footsteps', url: '/sounds/ocean/deck.mp3', icon: '👣' },
+        { id: 'ship-bell', name: 'Ship Bell', url: '/sounds/ocean/bell.mp3', icon: '🔔' }
     ],
     
     'Items & Objects': [
@@ -439,7 +459,9 @@ body.light-mode {
         { id: 'glass-break', name: 'Glass Breaking', url: '/sounds/items/glass.mp3', icon: '💥' },
         { id: 'bag-drop', name: 'Heavy Bag Drop', url: '/sounds/items/bag.mp3', icon: '🎒' },
         { id: 'lock-click', name: 'Lock Click', url: '/sounds/items/lock-click.mp3', icon: '🗝️' },
-        { id: 'ink-scratch', name: 'Ink Scratch', url: '/sounds/items/ink.mp3', icon: '✒️' }
+        { id: 'ink-scratch', name: 'Ink Scratch', url: '/sounds/items/ink.mp3', icon: '✒️' },
+        { id: 'coin-drop', name: 'Coin Drop', url: '/sounds/items/coin-drop.mp3', icon: '🪙' },
+        { id: 'rope', name: 'Rope Uncoil', url: '/sounds/items/rope.mp3', icon: '🪢' }
     ],
     
     'Doors & Movement': [
@@ -449,7 +471,9 @@ body.light-mode {
         { id: 'footsteps-stone', name: 'Footsteps on Stone', url: '/sounds/doors/stone-steps.mp3', icon: '🦶' },
         { id: 'running', name: 'Running Footsteps', url: '/sounds/doors/running.mp3', icon: '🏃' },
         { id: 'stairs', name: 'Climbing Stairs', url: '/sounds/doors/stairs.mp3', icon: '🪜' },
-        { id: 'stealth-steps', name: 'Stealthy Steps', url: '/sounds/doors/stealth.mp3', icon: '🫥' }
+        { id: 'stealth-steps', name: 'Stealthy Steps', url: '/sounds/doors/stealth.mp3', icon: '🫥' },
+        { id: 'ladder', name: 'Climb Ladder', url: '/sounds/doors/ladder.mp3', icon: '🪜' },
+        { id: 'window-open', name: 'Window Open', url: '/sounds/doors/window.mp3', icon: '🪟' }
     ],
     
     'Horror & Suspense': [
@@ -462,7 +486,9 @@ body.light-mode {
         { id: 'breathing', name: 'Heavy Breathing', url: '/sounds/horror/breathing.mp3', icon: '😮‍💨' },
         { id: 'distant-scream', name: 'Distant Scream', url: '/sounds/horror/distant-scream.mp3', icon: '🗣️' },
         { id: 'light-flicker', name: 'Light Flicker', url: '/sounds/horror/flicker.mp3', icon: '💡' },
-        { id: 'door-rattle', name: 'Door Rattle', url: '/sounds/horror/door-rattle.mp3', icon: '🚪' }
+        { id: 'door-rattle', name: 'Door Rattle', url: '/sounds/horror/door-rattle.mp3', icon: '🚪' },
+        { id: 'heartbeat-slow', name: 'Slow Heartbeat', url: '/sounds/horror/heartbeat-slow.mp3', icon: '❤️' },
+        { id: 'chains-drag', name: 'Chains Dragging', url: '/sounds/horror/chains-drag.mp3', icon: '⛓️' }
     ],
     
     'Sci-Fi & Futuristic': [
@@ -472,6 +498,8 @@ body.light-mode {
         { id: 'alarm', name: 'Red Alert', url: '/sounds/scifi/alarm.mp3', icon: '🚨' },
         { id: 'teleporter', name: 'Teleporter', url: '/sounds/scifi/teleport.mp3', icon: '✨' },
         { id: 'computer', name: 'Computer Beeps', url: '/sounds/scifi/computer.mp3', icon: '💻' },
+        { id: 'airlock', name: 'Airlock', url: '/sounds/scifi/airlock.mp3', icon: '🛰️' },
+        { id: 'drone', name: 'Drone Hover', url: '/sounds/scifi/drone.mp3', icon: '🛸' }
     ],
     
     'Victory & Defeat': [
@@ -1496,26 +1524,26 @@ document.getElementById('categories-container').innerHTML = categoriesHtml;
             }
 
             // Render Favorites
-                const favHtml = favorites.map(sound => {
-                    const isActive = activeSounds[sound.id]?.isPlaying;
-                    return `
-                        <div class="relative">
-                            <button onclick="playSound('${sound.id}', '${sound.name}', '${sound.url}', '${sound.category}', '${sound.icon}')" 
-                                class="w-full px-3 py-4 rounded-lg font-medium transition-all flex flex-col items-center gap-2 ${
-                                    isActive 
-                                        ? 'bg-gradient-to-r from-green-600 to-emerald-600 shadow-lg shadow-green-500/50' 
-                                        : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500'
-                                }">
-                                <span class="text-2xl">${sound.icon}</span>
-                                <span class="text-sm text-center">${sound.name}</span>
-                            </button>
-                            <button onclick="toggleFavorite('${sound.id}', '${sound.name}', '${sound.url}', '${sound.category}', '${sound.icon}')" 
-                                class="absolute -top-2 -right-2 p-1 bg-slate-700 hover:bg-slate-600 rounded-full transition-colors">
-                                <span class="w-4 h-4 block">${icons.x}</span>
-                            </button>
-                        </div>
-                    `;
-                }).join('');
+                 const favHtml = favorites.map(sound => {
+                     const isActive = activeSounds[sound.id]?.isPlaying;
+                     return `
+                         <div class="relative">
+                             <button onclick="playSound('${sound.id}', '${sound.name}', '${sound.url}', '${sound.category}', '${sound.icon}')" 
+                                 class="w-full px-2 py-2 rounded-md font-medium transition-all flex flex-col items-center gap-1 ${
+                                     isActive 
+                                         ? 'bg-gradient-to-r from-green-600 to-emerald-600 shadow-md shadow-green-500/30' 
+                                         : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500'
+                                 }">
+                                 <span class="text-xl">${sound.icon}</span>
+                                 <span class="text-xs text-center leading-tight">${sound.name}</span>
+                             </button>
+                             <button onclick="toggleFavorite('${sound.id}', '${sound.name}', '${sound.url}', '${sound.category}', '${sound.icon}')" 
+                                 class="absolute -top-1.5 -right-1.5 p-1 bg-slate-700 hover:bg-slate-600 rounded-full transition-colors">
+                                 <span class="w-3 h-3 block">${icons.x}</span>
+                             </button>
+                         </div>
+                     `;
+                 }).join('');
                 document.getElementById('favorites-grid').innerHTML = favHtml;
 
             // Sound Grid removed
