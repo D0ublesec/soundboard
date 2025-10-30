@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Board Game Soundboard</title>
+    <title>Bloopr</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' x='0.1em' font-size='90'%3E%F0%9F%8E%B2%3C/text%3E%3C/svg%3E" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide-static/0.263.1/lucide.min.css">
     <style>
         input[type="range"] {
             -webkit-appearance: none;
@@ -39,12 +39,7 @@
             cursor: pointer;
             border: none;
         }
-        .icon {
-            display: inline-block;
-            width: 1em;
-            height: 1em;
-            vertical-align: middle;
-        }
+        
 	.time-display {
     	    font-size: 0.75rem;
     	    color: rgb(148, 163, 184);
@@ -57,13 +52,38 @@
             50% { box-shadow: 0 0 0 12px rgba(236,72,153,0.0); }
             100% { box-shadow: 0 0 0 0 rgba(236,72,153,0.0); }
         }
-    </style>
+</style>
+<style>
+/* Light mode overrides */
+body.light-mode {
+    background-image: none !important;
+    background-color: #f8fafc !important; /* slate-50 */
+    color: #0f172a !important; /* slate-900 */
+}
+.light-mode [class*="text-white"] { color: #0f172a !important; }
+.light-mode [class*="bg-slate-900"],
+.light-mode [class*="bg-slate-800"],
+.light-mode [class*="bg-slate-700"] { background-color: #f1f5f9 !important; } /* slate-100 */
+.light-mode [class*="border-slate-700"],
+.light-mode [class*="border-purple-500"] { border-color: #cbd5e1 !important; } /* slate-300 */
+.light-mode [class*="text-slate-300"] { color: #334155 !important; } /* slate-700 */
+.light-mode [class*="text-slate-400"] { color: #475569 !important; } /* slate-600 */
+.light-mode [class*="bg-slate-700 hover:bg-slate-600"] { background-color: #e2e8f0 !important; }
+.light-mode #active-sounds-bar { background-color: rgba(248,250,252,0.95) !important; }
+</style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
     <div class="container mx-auto px-4 py-8 pb-32">
-        <h1 class="text-4xl font-bold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-            Board Game Soundboard
-        </h1>
+        <div class="relative mb-4">
+            <div class="absolute right-0 top-0 flex items-center gap-2">
+                <button onclick="toggleLightMode()" class="px-3 py-2 rounded-full bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 text-sm md:text-base" aria-label="Toggle light mode">🌓</button>
+                <button onclick="openInfoModal()" class="px-3 py-2 rounded-full bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 text-sm md:text-base" aria-label="Info and Help">ℹ️</button>
+            </div>
+            <div class="text-center">
+                <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Bloopr</h1>
+                <div id="active-session-label" class="mt-1 text-slate-300 text-sm">Session: Default</div>
+            </div>
+        </div>
 
         <!-- Favorites Section -->
         <div id="favorites-section" class="flex justify-between items-center mb-4 flex-wrap gap-2">
@@ -72,6 +92,11 @@
         Favorites
     </h2>
         <div class="w-full flex flex-wrap gap-2 p-2 bg-slate-800/40 border border-slate-700 rounded-xl">
+        <div class="w-full flex items-center gap-2 mb-1">
+            <button onclick="openSessionsModal()" class="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-sm">Sessions</button>
+            <button onclick="exportFavorites()" class="px-3 py-2 rounded bg-indigo-600 hover:bg-indigo-700 text-sm">Export</button>
+            <button onclick="openImportModal()" class="px-3 py-2 rounded bg-purple-600 hover:bg-purple-700 text-sm">Import</button>
+        </div>
         <button onclick="expandAll()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm md:text-base transition-all shadow-sm active:scale-[0.98] bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500">
             <span class="text-base">⬇️</span>
             <span>Expand</span>
@@ -121,12 +146,12 @@
     <!-- Preset Modal -->
     <div id="preset-modal" class="hidden fixed inset-0 z-50">
         <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closePresetModal()"></div>
-        <div class="relative mx-auto mt-16 w-11/12 max-w-4xl bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
-            <div class="flex items-center justify-between p-4 border-b border-slate-700">
+        <div class="relative mx-auto mt-16 w-11/12 max-w-4xl bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-slate-700 flex-shrink-0">
                 <h3 class="text-lg font-semibold">Choose a Preset</h3>
                 <button onclick="closePresetModal()" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded">Close</button>
             </div>
-            <div id="preset-grid" class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            <div id="preset-grid" class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto flex-1"></div>
         </div>
     </div>
 
@@ -145,13 +170,137 @@
         </div>
     </div>
 
+    <!-- Sessions Modal -->
+    <div id="sessions-modal" class="hidden fixed inset-0 z-50">
+        <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeSessionsModal()"></div>
+        <div class="relative mx-auto mt-16 w-11/12 max-w-3xl bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
+            <div class="flex items-center justify-between p-4 border-b border-slate-700">
+                <h3 class="text-lg font-semibold">Manage Sessions</h3>
+                <button onclick="closeSessionsModal()" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded">Close</button>
+            </div>
+            <div class="p-4 flex items-center gap-2">
+                <input id="session-name-input" type="text" placeholder="New session name" class="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                <button onclick="createSessionFromModal()" class="px-3 py-2 rounded bg-emerald-600 hover:bg-emerald-700 text-sm">Create</button>
+            </div>
+            <div id="session-create-error" class="px-4 text-rose-400 text-sm hidden"></div>
+            <div id="sessions-list" class="px-4 pb-4 max-h-80 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="hidden fixed inset-0 z-50">
+        <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeConfirmModal()"></div>
+        <div class="relative mx-auto mt-24 w-11/12 max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
+            <div class="p-4 border-b border-slate-700">
+                <h3 id="confirm-title" class="text-lg font-semibold">Confirm</h3>
+            </div>
+            <div id="confirm-message" class="p-4 text-slate-300">Are you sure?</div>
+            <div class="p-4 flex justify-end gap-2 border-t border-slate-700">
+                <button onclick="closeConfirmModal()" class="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-sm">Cancel</button>
+                <button onclick="confirmModalProceed()" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700 text-sm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Session Modal -->
+    <div id="rename-modal" class="hidden fixed inset-0 z-50">
+        <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeRenameModal()"></div>
+        <div class="relative mx-auto mt-24 w-11/12 max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
+            <div class="p-4 border-b border-slate-700">
+                <h3 class="text-lg font-semibold">Rename Session</h3>
+            </div>
+            <div class="p-4">
+                <input id="rename-input" type="text" placeholder="Session name" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                <div id="rename-error" class="mt-2 text-rose-400 text-sm hidden"></div>
+            </div>
+            <div class="p-4 flex justify-end gap-2 border-t border-slate-700">
+                <button onclick="closeRenameModal()" class="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-sm">Cancel</button>
+                <button onclick="saveRenameSession()" class="px-3 py-2 rounded bg-emerald-600 hover:bg-emerald-700 text-sm">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="hidden fixed inset-0 z-50">
+        <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeInfoModal()"></div>
+        <div class="relative mx-auto mt-12 w-11/12 max-w-3xl bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
+            <div class="flex items-center justify-between p-4 border-b border-slate-700">
+                <h3 class="text-lg font-semibold">Info & Help</h3>
+                <button onclick="closeInfoModal()" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded">Close</button>
+            </div>
+            <div class="p-4 space-y-4 text-sm md:text-base">
+                <div>
+                    <h4 class="font-semibold mb-1">Using Bloopr</h4>
+                    <ul class="list-disc pl-5 text-slate-300">
+                        <li>Tap a sound to Play/Pause. Use Loop to repeat.</li>
+                        <li>Priority ducks other sounds while it plays.</li>
+                        <li>Active bar shows volume, loop, pause, stop for each playing sound.</li>
+                        <li>Search finds sounds and jumps to them.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-1">Favorites, Sessions, Presets</h4>
+                    <ul class="list-disc pl-5 text-slate-300">
+                        <li>Favorites are saved per Session. Use Sessions to create/switch/rename.</li>
+                        <li>Presets quickly load curated sets.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-1">Import/Export</h4>
+                    <ul class="list-disc pl-5 text-slate-300">
+                        <li>Export downloads a JSON of sound names.</li>
+                        <li>Import accepts a JSON of names; unknown names are skipped with a note.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-1">Mobile tips</h4>
+                    <ul class="list-disc pl-5 text-slate-300">
+                        <li>Use Expand on the Active bar to see more at once.</li>
+                        <li>Buttons are touch-friendly; rotate for wider layouts.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notice Modal -->
+    <div id="notice-modal" class="hidden fixed inset-0 z-50">
+        <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeNotice()"></div>
+        <div class="relative mx-auto mt-24 w-11/12 max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
+            <div class="p-4 border-b border-slate-700">
+                <h3 class="text-lg font-semibold">Notice</h3>
+            </div>
+            <div id="notice-message" class="p-4 text-slate-300">Done.</div>
+            <div class="p-4 flex justify-end gap-2 border-t border-slate-700">
+                <button onclick="closeNotice()" class="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-sm">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="import-modal" class="hidden fixed inset-0 z-50">
+        <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeIOModal()"></div>
+        <div class="relative mx-auto mt-16 w-11/12 max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
+            <div class="flex items-center justify-between p-4 border-b border-slate-700">
+                <h3 class="text-lg font-semibold" id="io-title">Import session</h3>
+                <button onclick="closeIOModal()" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded">Close</button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div>
+                    <h4 class="font-semibold mb-2">Import session</h4>
+                    <input id="import-file" type="file" accept="application/json" class="block w-full text-sm text-slate-300" />
+                    <div id="import-error" class="mt-2 text-rose-400 text-sm hidden"></div>
+                    <div class="mt-3 flex justify-end">
+                        <button onclick="importFavoritesFromInput()" class="px-3 py-2 rounded bg-purple-600 hover:bg-purple-700 text-sm">Import</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Icons as SVG strings
         const icons = {
-            music: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>',
-            zap: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>',
-            cloud: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>',
-            skull: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle><path d="M8 20v2h8v-2"></path><path d="M12.5 17H11"></path><path d="M13 17v-2"></path><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"></path></svg>',
             play: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
             pause: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>',
             square: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>',
@@ -425,11 +574,41 @@ const categoryIcons = {
         // State Management
         let activeSounds = {};
 let audioElements = {};
-let favorites = JSON.parse(localStorage.getItem('soundboard-favorites') || '[]');
+let sessions = JSON.parse(localStorage.getItem('soundboard-sessions') || '[]');
+let currentSessionId = JSON.parse(localStorage.getItem('soundboard-currentSessionId') || 'null');
+function ensureDefaultSession() {
+    if (!Array.isArray(sessions) || sessions.length === 0) {
+        const def = { id: 'default', name: 'Default' };
+        sessions = [def];
+        localStorage.setItem('soundboard-sessions', JSON.stringify(sessions));
+        localStorage.setItem('soundboard-currentSessionId', JSON.stringify(def.id));
+        currentSessionId = def.id;
+        // Migrate old favorites key if present
+        const oldFav = localStorage.getItem('soundboard-favorites');
+        if (oldFav) {
+            localStorage.setItem(`soundboard-favorites-${def.id}`, oldFav);
+            localStorage.removeItem('soundboard-favorites');
+        }
+    }
+    if (!currentSessionId || !sessions.find(s => s.id === currentSessionId)) {
+        currentSessionId = sessions[0].id;
+        localStorage.setItem('soundboard-currentSessionId', JSON.stringify(currentSessionId));
+    }
+}
+ensureDefaultSession();
+function getFavoritesKey() { return `soundboard-favorites-${currentSessionId}`; }
+function loadFavorites() {
+    try { return JSON.parse(localStorage.getItem(getFavoritesKey()) || '[]'); } catch { return []; }
+}
+function persistFavorites() {
+    localStorage.setItem(getFavoritesKey(), JSON.stringify(favorites));
+}
+let favorites = loadFavorites();
 let expandedCategories = JSON.parse(localStorage.getItem('soundboard-expanded') || '["Tavern & Inn"]'); // First category expanded by default
 let activeTab = JSON.parse(localStorage.getItem('soundboard-activeTab') || 'null') || Object.keys(soundLibrary)[0];
 const DUCK_FACTOR = 0.3;
 let activeBarExpanded = JSON.parse(localStorage.getItem('soundboard-activeBarExpanded') || 'false');
+let lightMode = JSON.parse(localStorage.getItem('soundboard-lightMode') || 'false');
 
 // Preset definitions: curated lists of sound ids
 const presets = {
@@ -521,6 +700,15 @@ function findSoundById(soundId) {
     return null;
 }
 
+function findSoundByName(soundName) {
+    const target = String(soundName || '').toLowerCase();
+    for (const [category, sounds] of Object.entries(soundLibrary)) {
+        const sound = sounds.find(s => String(s.name).toLowerCase() === target);
+        if (sound) return { sound, category };
+    }
+    return null;
+}
+
 function openSearchModal() {
     const modal = document.getElementById('search-modal');
     const input = document.getElementById('search-input');
@@ -561,7 +749,8 @@ function performSearch(query) {
             </div>
         </button>
     `).join('');
-    resultsEl.innerHTML = html || '<div class="px-3 py-2 text-slate-400">No results</div>';
+    const safeQ = sanitizeText(q);
+    resultsEl.innerHTML = html || `<div class="px-3 py-2 text-slate-400">No results for "${safeQ}"</div>`;
 }
 
 function goToSound(soundId, category) {
@@ -603,7 +792,7 @@ function applyPreset(presetName) {
         }
     });
     favorites = newFavorites;
-    localStorage.setItem('soundboard-favorites', JSON.stringify(favorites));
+    persistFavorites();
     // Expand categories included in the preset for quick access
     expandedCategories = Array.from(categoriesToExpand);
     localStorage.setItem('soundboard-expanded', JSON.stringify(expandedCategories));
@@ -646,6 +835,282 @@ function collapseAll() {
     render();
 }
 
+function sanitizeText(input) {
+    if (typeof input !== 'string') return '';
+    return input.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+}
+
+function openSessionsModal() {
+    renderSessionsModal();
+    document.getElementById('sessions-modal').classList.remove('hidden');
+}
+
+function closeSessionsModal() {
+    document.getElementById('sessions-modal').classList.add('hidden');
+    const input = document.getElementById('session-name-input');
+    if (input) input.value = '';
+}
+
+function renderSessionsModal() {
+    const container = document.getElementById('sessions-list');
+    if (!container) return;
+    const rows = sessions.map(s => `
+        <div class="flex items-center gap-2 py-2 border-b border-slate-800">
+            <div class="flex-1 truncate ${s.id===currentSessionId?'text-emerald-300':''}">${sanitizeText(s.name)}</div>
+            <button onclick="switchSession('${s.id}')" class="px-2 py-1 text-xs rounded bg-slate-700 hover:bg-slate-600">Switch</button>
+            <button onclick="openRenameModal('${s.id}')" class="px-2 py-1 text-xs rounded bg-slate-700 hover:bg-slate-600">Rename</button>
+            <button onclick="openConfirmClear('${s.id}')" class="px-2 py-1 text-xs rounded bg-amber-600 hover:bg-amber-700">Clear</button>
+            <button onclick="openConfirmDelete('${s.id}')" class="px-2 py-1 text-xs rounded bg-red-600 hover:bg-red-700">Delete</button>
+        </div>
+    `).join('');
+    container.innerHTML = rows || '<div class="text-slate-400">No sessions</div>';
+}
+
+let confirmState = { type: null, sessionId: null };
+function openConfirm(title, message, type, sessionId) {
+    confirmState = { type, sessionId };
+    const t = document.getElementById('confirm-title');
+    const m = document.getElementById('confirm-message');
+    if (t) t.textContent = String(title || 'Confirm');
+    if (m) m.textContent = String(message || 'Are you sure?');
+    document.getElementById('confirm-modal').classList.remove('hidden');
+}
+function closeConfirmModal() {
+    document.getElementById('confirm-modal').classList.add('hidden');
+    confirmState = { type: null, sessionId: null };
+}
+function openConfirmClear(id) {
+    const s = sessions.find(x => x.id===id);
+    openConfirm('Clear Session', `Clear all favorites in "${s ? s.name : ''}"?`, 'clear', id);
+}
+function openConfirmDelete(id) {
+    const s = sessions.find(x => x.id===id);
+    openConfirm('Delete Session', `Delete session "${s ? s.name : ''}"? This cannot be undone.`, 'delete', id);
+}
+function confirmModalProceed() {
+    if (confirmState.type === 'clear') {
+        clearSession(confirmState.sessionId);
+    } else if (confirmState.type === 'delete') {
+        deleteSession(confirmState.sessionId);
+    }
+    closeConfirmModal();
+}
+
+function openInfoModal() { document.getElementById('info-modal').classList.remove('hidden'); }
+function closeInfoModal() { document.getElementById('info-modal').classList.add('hidden'); }
+
+function openImportModal() {
+    const m = document.getElementById('import-modal');
+    const err = document.getElementById('import-error');
+    if (err) { err.classList.add('hidden'); err.textContent=''; }
+    const f = document.getElementById('import-file');
+    if (f) f.value = '';
+    m.classList.remove('hidden');
+}
+function closeIOModal() {
+    document.getElementById('import-modal').classList.add('hidden');
+}
+
+function showNotice(message) {
+    const el = document.getElementById('notice-message');
+    if (el) el.textContent = String(message || '');
+    const m = document.getElementById('notice-modal');
+    m.classList.remove('hidden');
+}
+function closeNotice() {
+    document.getElementById('notice-modal').classList.add('hidden');
+}
+
+function createSessionFromModal() {
+    const input = document.getElementById('session-name-input');
+    const sanitized = sanitizeText((input?.value||'').trim()).slice(0,64);
+    const err = document.getElementById('session-create-error');
+    if (err) { err.classList.add('hidden'); err.textContent=''; }
+    if (!sanitized) { if (err){err.textContent='Please enter a session name.'; err.classList.remove('hidden');} return; }
+    if (sessions.some(s => s.name.toLowerCase() === sanitized.toLowerCase())) {
+        if (err){err.textContent='Session name must be unique. Please choose another.'; err.classList.remove('hidden');}
+        return;
+    }
+    const id = 's_' + Math.random().toString(36).slice(2,10);
+    sessions.push({ id, name: sanitized });
+    localStorage.setItem('soundboard-sessions', JSON.stringify(sessions));
+    currentSessionId = id;
+    localStorage.setItem('soundboard-currentSessionId', JSON.stringify(currentSessionId));
+    favorites = [];
+    persistFavorites();
+    renderSessionsModal();
+    // Immediately close modal so user can use the new session
+    closeSessionsModal();
+    render();
+    input.value = '';
+}
+
+let renameTargetId = null;
+function openRenameModal(id) {
+    renameTargetId = id;
+    const s = sessions.find(x=>x.id===id);
+    const input = document.getElementById('rename-input');
+    const err = document.getElementById('rename-error');
+    if (err){err.textContent=''; err.classList.add('hidden');}
+    if (input) input.value = s ? s.name : '';
+    document.getElementById('rename-modal').classList.remove('hidden');
+}
+function closeRenameModal() {
+    document.getElementById('rename-modal').classList.add('hidden');
+    renameTargetId = null;
+}
+function saveRenameSession() {
+    const s = sessions.find(x=>x.id===renameTargetId);
+    if (!s) { closeRenameModal(); return; }
+    const input = document.getElementById('rename-input');
+    const err = document.getElementById('rename-error');
+    const sanitized = sanitizeText((input?.value||'').trim()).slice(0,64);
+    if (err){err.textContent=''; err.classList.add('hidden');}
+    if (!sanitized) { if (err){err.textContent='Please enter a session name.'; err.classList.remove('hidden');} return; }
+    if (sessions.some(x => x.id!==s.id && x.name.toLowerCase()===sanitized.toLowerCase())) {
+        if (err){err.textContent='Session name must be unique. Please choose another.'; err.classList.remove('hidden');}
+        return;
+    }
+    s.name = sanitized;
+    localStorage.setItem('soundboard-sessions', JSON.stringify(sessions));
+    renderSessionsModal();
+    closeRenameModal();
+    // Re-render to update header label if current session was renamed
+    render();
+}
+
+function clearSession(id) {
+    if (!sessions.find(s=>s.id===id)) return;
+    localStorage.setItem(`soundboard-favorites-${id}`, '[]');
+    if (id===currentSessionId) { favorites = []; render(); }
+    renderSessionsModal();
+}
+
+function deleteSession(id) {
+    if (sessions.length<=1) { showNotice('Cannot delete the last session.'); return; }
+    sessions = sessions.filter(s=>s.id!==id);
+    localStorage.setItem('soundboard-sessions', JSON.stringify(sessions));
+    localStorage.removeItem(`soundboard-favorites-${id}`);
+    if (currentSessionId===id) {
+        currentSessionId = sessions[0].id;
+        localStorage.setItem('soundboard-currentSessionId', JSON.stringify(currentSessionId));
+        favorites = loadFavorites();
+        render();
+    }
+    renderSessionsModal();
+}
+
+function sessionsPopulateSelect() {
+    const sel = document.getElementById('session-select');
+    if (!sel) return;
+    sel.innerHTML = sessions.map(s => `<option value="${s.id}" ${s.id===currentSessionId?'selected':''}>${sanitizeText(s.name)}</option>`).join('');
+}
+
+function switchSession(sessionId) {
+    if (!sessions.find(s => s.id === sessionId)) return;
+    currentSessionId = sessionId;
+    localStorage.setItem('soundboard-currentSessionId', JSON.stringify(currentSessionId));
+    favorites = loadFavorites();
+    render();
+    const sm = document.getElementById('sessions-modal');
+    if (sm && !sm.classList.contains('hidden')) closeSessionsModal();
+}
+
+function newSessionPrompt() {
+    const name = prompt('New session name:') || '';
+    const sanitized = sanitizeText(name.trim()).slice(0, 64);
+    if (!sanitized) return;
+    const id = 's_' + Math.random().toString(36).slice(2, 10);
+    sessions.push({ id, name: sanitized });
+    localStorage.setItem('soundboard-sessions', JSON.stringify(sessions));
+    currentSessionId = id;
+    localStorage.setItem('soundboard-currentSessionId', JSON.stringify(currentSessionId));
+    favorites = [];
+    persistFavorites();
+    sessionsPopulateSelect();
+    render();
+}
+
+function renameSessionPrompt() {
+    const cur = sessions.find(s => s.id === currentSessionId);
+    if (!cur) return;
+    const name = prompt('Rename session:', cur.name) || '';
+    const sanitized = sanitizeText(name.trim()).slice(0, 64);
+    if (!sanitized) return;
+    cur.name = sanitized;
+    localStorage.setItem('soundboard-sessions', JSON.stringify(sessions));
+    sessionsPopulateSelect();
+}
+
+function clearSessionConfirm() {
+    if (!confirm('Clear all favorites in this session?')) return;
+    favorites = [];
+    persistFavorites();
+    render();
+}
+
+function deleteSessionConfirm() {
+    if (!confirm('Delete this session and its data?')) return;
+    if (sessions.length <= 1) { alert('Cannot delete the last session.'); return; }
+    localStorage.removeItem(getFavoritesKey());
+    sessions = sessions.filter(s => s.id !== currentSessionId);
+    localStorage.setItem('soundboard-sessions', JSON.stringify(sessions));
+    currentSessionId = sessions[0].id;
+    localStorage.setItem('soundboard-currentSessionId', JSON.stringify(currentSessionId));
+    favorites = loadFavorites();
+    sessionsPopulateSelect();
+    render();
+}
+
+function exportFavorites() {
+    const names = (favorites||[]).map(f => f.name).filter(n => !!n);
+    const unique = Array.from(new Set(names));
+    const data = { version: 2, names: unique };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const sess = sessions.find(s => s.id === currentSessionId);
+    a.download = `soundboard_${(sess?.name||'session').replace(/\s+/g,'_').toLowerCase()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
+}
+
+function importFavoritesFromInput() {
+    const file = document.getElementById('import-file')?.files?.[0];
+    const err = document.getElementById('import-error');
+    if (err) { err.classList.add('hidden'); err.textContent=''; }
+    if (!file) { if (err){err.textContent='Please choose a JSON file.'; err.classList.remove('hidden');} return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const obj = JSON.parse(String(reader.result || '{}'));
+            // Support v2 (names) and v1 (favorites objects), but only use names
+            let names = Array.isArray(obj?.names) ? obj.names : Array.isArray(obj?.favorites) ? obj.favorites.map(x => x?.name) : [];
+            names = names.map(n => sanitizeText(String(n||'').slice(0,128))).filter(n => !!n);
+            const seen = new Set();
+            const unique = names.filter(n => { const k=n.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+            // Map names to sounds in the library
+            const resolved = unique.map(n => findSoundByName(n)).filter(Boolean);
+            const missing = unique.filter(n => !findSoundByName(n));
+            favorites = resolved.map(({ sound, category }) => ({ id: sound.id, name: sound.name, url: sound.url, category, icon: sound.icon }));
+            persistFavorites();
+            render();
+            closeIOModal();
+            if (missing.length) {
+                showNotice(`Imported with ${missing.length} not found: ${missing.slice(0,5).join(', ')}${missing.length>5 ? '…' : ''}`);
+            } else {
+                showNotice('Favorites imported.');
+            }
+        } catch (e) {
+            if (err){err.textContent='Incorrect file format. Export a sample to see the expected JSON.'; err.classList.remove('hidden');}
+        }
+    };
+    reader.onerror = () => { if (err){err.textContent='Failed to read file.'; err.classList.remove('hidden');} };
+    reader.readAsText(file);
+}
+
 function favoriteCategory(category) {
     const sounds = soundLibrary[category];
     const soundIds = sounds.map(s => s.id);
@@ -667,7 +1132,7 @@ function favoriteCategory(category) {
             }
         });
     }
-    localStorage.setItem('soundboard-favorites', JSON.stringify(favorites));
+    persistFavorites();
     render();
 }
 
@@ -879,14 +1344,14 @@ function setSmartMixBeforePlay(soundId, soundName, url, category, icon) {
             } else {
                 favorites.push({ id: soundId, name: soundName, url: url, category: category, icon: icon });
             }
-            localStorage.setItem('soundboard-favorites', JSON.stringify(favorites));
+    persistFavorites();
             render();
         }
 
         // Clear All Favorites
         function clearAllFavorites() {
             favorites = [];
-            localStorage.setItem('soundboard-favorites', JSON.stringify(favorites));
+            persistFavorites();
             render();
         }
 
@@ -924,6 +1389,12 @@ function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function toggleLightMode() {
+    lightMode = !lightMode;
+    localStorage.setItem('soundboard-lightMode', JSON.stringify(lightMode));
+    render();
 }
 
         // Render UI
@@ -1007,6 +1478,19 @@ const categoriesHtml = Object.keys(soundLibrary).map(category => {
 }).join('');
 
 document.getElementById('categories-container').innerHTML = categoriesHtml;
+            // Update active session label
+            const sessLbl = document.getElementById('active-session-label');
+            if (sessLbl) {
+                const sess = sessions.find(s => s.id === currentSessionId);
+                sessLbl.textContent = `Session: ${sess ? sess.name : 'Default'}`;
+            }
+            // Apply light mode
+            const bodyEl = document.body;
+            if (lightMode) {
+                bodyEl.classList.add('light-mode');
+            } else {
+                bodyEl.classList.remove('light-mode');
+            }
 
             // Render Favorites
             const favHtml = favorites.map(sound => {
@@ -1102,4 +1586,3 @@ if (activeSoundsCount > 0) {
     </script>
 </body>
 </html>
-
