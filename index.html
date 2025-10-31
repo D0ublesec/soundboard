@@ -912,6 +912,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let audioElements = {};
         let audioContext = null;
         let gainNodes = {}; // Store GainNodes for iOS volume control
+        let sceneTimeouts = []; // Track scene timeouts for cancellation
+        let sceneIntervals = []; // Track scene intervals for cancellation
         
         // Initialize Web Audio API context (required for iOS volume control)
         function getAudioContext() {
@@ -2120,10 +2122,20 @@ function playSoundGroup(groupIndex) {
     const delays = group.delays || {};
     const shouldLoop = group.loop || false;
     
+    // Clear any previous scene timeouts and intervals
+    sceneTimeouts.forEach(timeoutId => {
+        clearTimeout(timeoutId);
+    });
+    sceneTimeouts = [];
+    sceneIntervals.forEach(intervalId => {
+        clearInterval(intervalId);
+    });
+    sceneIntervals = [];
+    
     // Fade out all currently active sounds first (2000ms fade out)
     fadeOutAllSounds(2000).then(() => {
         // Wait a brief moment after fade out completes before starting new scene
-        setTimeout(() => {
+        const bufferTimeout = setTimeout(() => {
             // Play all sounds in the group with their default volumes and delays
             group.soundIds.forEach(soundId => {
                 const found = findSoundById(soundId);
@@ -2137,8 +2149,16 @@ function playSoundGroup(groupIndex) {
                     volumeMem[sound.id] = defaultVol;
                     localStorage.setItem('soundboard-volumeMemory', JSON.stringify(volumeMem));
                     
-                    // Play sound function - starts playing then fades in
+                    // Play sound function - starts at volume 0 then fades in smoothly
                     const playSoundAndFadeIn = () => {
+                        // Set volume to 0 BEFORE playing to ensure smooth fade-in
+                        const audio = getAudioElement(sound.id, sound.url, false);
+                        getGainNode(sound.id, audio);
+                        setVolumeViaWebAudio(sound.id, 0);
+                        try {
+                            audio.volume = 0;
+                        } catch(e) {}
+                        
                         // If scene looping is enabled AND sound has no delay, set loop before playing
                         // Sounds with delays should never loop (they're typically one-time events)
                         if (shouldLoop && delay === 0) {
@@ -2149,8 +2169,37 @@ function playSoundGroup(groupIndex) {
                             playSound(sound.id, sound.name, sound.url, category, sound.icon);
                         }
                         
-                        // Fade in the sound after a brief moment to ensure it's playing
-                        setTimeout(() => {
+                        // Ensure volume is 0 immediately after play
+                        // Use requestAnimationFrame to ensure volume stays at 0 until fade-in starts
+                        const ensureVolumeZero = () => {
+                            const audio = audioElements[sound.id];
+                            if (audio) {
+                                setVolumeViaWebAudio(sound.id, 0);
+                                try {
+                                    audio.volume = 0;
+                                } catch(e) {}
+                            }
+                        };
+                        
+                        // Keep volume at 0 using interval until audio is confirmed playing
+                        const volumeZeroInterval = setInterval(() => {
+                            const audio = audioElements[sound.id];
+                            if (audio && !audio.paused) {
+                                ensureVolumeZero();
+                            }
+                        }, 16); // ~60fps
+                        
+                        sceneIntervals.push(volumeZeroInterval);
+                        
+                        // Start fade-in very quickly after play starts
+                        const fadeInTimeout = setTimeout(() => {
+                            // Clear the interval when fade-in starts
+                            const intervalIndex = sceneIntervals.indexOf(volumeZeroInterval);
+                            if (intervalIndex > -1) {
+                                clearInterval(volumeZeroInterval);
+                                sceneIntervals.splice(intervalIndex, 1);
+                            }
+                            
                             const audio = audioElements[sound.id];
                             if (audio && !audio.paused && activeSounds[sound.id]) {
                                 fadeInSound(sound.id, defaultVol, 2000);
@@ -2167,18 +2216,32 @@ function playSoundGroup(groupIndex) {
                                     activeSounds[sound.id].volume = defaultVol;
                                 }
                             }
-                        }, 100);
+                        }, 100); // Brief delay to ensure audio has started
+                        
+                        sceneTimeouts.push(fadeInTimeout);
+                        
+                        // Safety timeout to clear interval if fade-in doesn't start
+                        const safetyTimeout = setTimeout(() => {
+                            const intervalIndex = sceneIntervals.indexOf(volumeZeroInterval);
+                            if (intervalIndex > -1) {
+                                clearInterval(volumeZeroInterval);
+                                sceneIntervals.splice(intervalIndex, 1);
+                            }
+                        }, 500);
+                        sceneTimeouts.push(safetyTimeout);
                     };
                     
                     // For sounds without delay: play immediately (will fade in over 2 seconds)
                     // For sounds with delay: wait for fade in to complete (2000ms) + delay time, then play and fade in
                     if (delay > 0) {
                         // Wait for fade in to complete (2000ms for non-delayed sounds), then apply delay, then play
-                        setTimeout(() => {
+                        const delayTimeout1 = setTimeout(() => {
                             // After fade in completes, wait for delay time, then play
                             const delayMs = delay * 1000;
-                            setTimeout(playSoundAndFadeIn, delayMs);
+                            const delayTimeout2 = setTimeout(playSoundAndFadeIn, delayMs);
+                            sceneTimeouts.push(delayTimeout2);
                         }, 2000); // Wait for fade in to complete
+                        sceneTimeouts.push(delayTimeout1);
                     } else {
                         // Play immediately (fade in will happen after play)
                         playSoundAndFadeIn();
@@ -2186,6 +2249,8 @@ function playSoundGroup(groupIndex) {
                 }
             });
         }, 100); // Small buffer after fade out
+        
+        sceneTimeouts.push(bufferTimeout);
     });
     closeGroupsModal();
     render();
@@ -2856,6 +2921,19 @@ function setSmartMixBeforePlay(soundId, soundName, url, category, icon) {
         }
 
         function clearAllActiveSounds() {
+            // Cancel all pending scene timeouts
+            sceneTimeouts.forEach(timeoutId => {
+                clearTimeout(timeoutId);
+            });
+            sceneTimeouts = [];
+            
+            // Cancel all pending scene intervals
+            sceneIntervals.forEach(intervalId => {
+                clearInterval(intervalId);
+            });
+            sceneIntervals = [];
+            
+            // Stop all currently playing sounds
             Object.keys(activeSounds).forEach(soundId => {
                 const audio = audioElements[soundId];
                 if (audio) {
