@@ -2405,7 +2405,6 @@ audio.addEventListener('timeupdate', () => {
         audio.pause();
         activeSounds[soundId].isPlaying = false;
     } else {
-        audio.play();
         if (!activeSounds[soundId]) {
             // First time playing this sound - use volume memory
             const savedVolume = getVolumeMemory(soundId);
@@ -2421,10 +2420,27 @@ audio.addEventListener('timeupdate', () => {
                 duckApplied: false,
                 originalVolume: undefined
             };
+            // Set volume before play() for iOS compatibility
             audio.volume = savedVolume;
         } else {
-            // Resuming a paused sound
+            // Resuming a paused sound - ensure volume is set
+            audio.volume = activeSounds[soundId].volume || getVolumeMemory(soundId);
             activeSounds[soundId].isPlaying = true;
+        }
+        // For iOS, volume must be set before or immediately after play()
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                // Volume set after play() completes (iOS fallback)
+                if (activeSounds[soundId]) {
+                    audio.volume = activeSounds[soundId].volume || getVolumeMemory(soundId);
+                }
+            }).catch(() => {
+                // Play was interrupted, but volume should still be set
+                if (activeSounds[soundId]) {
+                    audio.volume = activeSounds[soundId].volume || getVolumeMemory(soundId);
+                }
+            });
         }
     }
     updateDucking();
@@ -2503,16 +2519,22 @@ function setSmartMixBeforePlay(soundId, soundName, url, category, icon) {
 
         // Set Volume
         function setVolume(soundId, volume) {
+            // For iOS, volume must be set synchronously within user gesture context
             const audio = audioElements[soundId];
             if (audio) {
+                // Set volume immediately - must be synchronous for iOS
                 audio.volume = volume;
             }
             if (activeSounds[soundId]) {
-            activeSounds[soundId].volume = volume;
-                // Save volume memory for this sound
+                activeSounds[soundId].volume = volume;
+            }
+            // Save volume memory (can be async)
+            try {
                 const volumeMem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}');
                 volumeMem[soundId] = volume;
                 localStorage.setItem('soundboard-volumeMemory', JSON.stringify(volumeMem));
+            } catch (e) {
+                // Ignore storage errors
             }
             //render();
         }
@@ -2785,6 +2807,8 @@ if (activeSoundsCount > 0) {
                     <span class="w-4 h-4 text-purple-400 flex-shrink-0">${icons.volume}</span>
                     <input type="range" min="0" max="1" step="0.01" value="${sound.volume}" 
                         oninput="setVolume('${soundId}', parseFloat(this.value)); event.stopPropagation();"
+                        ontouchstart="event.stopPropagation();"
+                        onchange="setVolume('${soundId}', parseFloat(this.value)); event.stopPropagation();"
                         class="flex-1 h-1 rounded-lg appearance-none cursor-pointer"
                         style="background: linear-gradient(to right, rgb(168, 85, 247) 0%, rgb(168, 85, 247) ${sound.volume * 100}%, rgb(51, 65, 85) ${sound.volume * 100}%, rgb(51, 65, 85) 100%)" />
                 <span class="text-xs text-slate-400 w-10 flex-shrink-0 text-right">${Math.round(sound.volume * 100)}%</span>
