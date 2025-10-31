@@ -254,7 +254,7 @@ body.light-mode {
             Active Sounds (<span id="active-count">0</span>)
             </span>
             <div class="flex items-center gap-2">
-                <button onclick="toggleActiveBarSize()" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-sm transition-colors min-w-[5rem]" id="activebar-size-btn">Expand</button>
+                <button onclick="toggleActiveBarSize()" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs transition-colors min-w-[4rem]" id="activebar-size-btn">Expand</button>
                 <button onclick="clearAllActiveSounds()" class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm transition-colors">Clear All</button>
             </div>
         </h3>
@@ -603,7 +603,8 @@ body.light-mode {
             volume: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>',
             star: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
             starFilled: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
-            x: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+            x: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+            refresh: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>'
         };
 
         // Sound Library Configuration - EDIT THIS TO ADD/REMOVE SOUNDS
@@ -2813,10 +2814,12 @@ if (activeSoundsCount > 0) {
             <div class="flex items-center gap-2 flex-1 min-w-0">
                     <span class="w-4 h-4 text-purple-400 flex-shrink-0">${icons.volume}</span>
                     <input type="range" min="0" max="1" step="0.01" value="${sound.volume}" 
-                        oninput="const vol = parseFloat(this.value); const audio = audioElements['${soundId}']; if (audio) audio.volume = vol; if (activeSounds['${soundId}']) { activeSounds['${soundId}'].volume = vol; try { const mem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}'); mem['${soundId}'] = vol; localStorage.setItem('soundboard-volumeMemory', JSON.stringify(mem)); } catch(e){} } event.stopPropagation();"
-                        ontouchmove="const vol = parseFloat(this.value); const audio = audioElements['${soundId}']; if (audio) audio.volume = vol; if (activeSounds['${soundId}']) activeSounds['${soundId}'].volume = vol; event.stopPropagation();"
-                        ontouchstart="event.stopPropagation();"
-                        onchange="const vol = parseFloat(this.value); const audio = audioElements['${soundId}']; if (audio) audio.volume = vol; if (activeSounds['${soundId}']) { activeSounds['${soundId}'].volume = vol; try { const mem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}'); mem['${soundId}'] = vol; localStorage.setItem('soundboard-volumeMemory', JSON.stringify(mem)); } catch(e){} } event.stopPropagation();"
+                        onpointerdown="const audio = audioElements['${soundId}']; if (audio) audio.volume = audio.volume;"
+                        onpointermove="const vol = parseFloat(this.value); const audio = audioElements['${soundId}']; if (audio) { try { audio.volume = vol; } catch(e){} } if (activeSounds['${soundId}']) activeSounds['${soundId}'].volume = vol; event.stopPropagation();"
+                        oninput="const vol = parseFloat(this.value); const audio = audioElements['${soundId}']; if (audio) { try { audio.volume = vol; } catch(e){} } if (activeSounds['${soundId}']) { activeSounds['${soundId}'].volume = vol; try { const mem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}'); mem['${soundId}'] = vol; localStorage.setItem('soundboard-volumeMemory', JSON.stringify(mem)); } catch(e){} } event.stopPropagation();"
+                        ontouchmove="const vol = parseFloat(this.value); const audio = audioElements['${soundId}']; if (audio) { try { audio.volume = vol; } catch(e){} } if (activeSounds['${soundId}']) activeSounds['${soundId}'].volume = vol; event.stopPropagation();"
+                        ontouchstart="const audio = audioElements['${soundId}']; if (audio) { try { audio.volume = audio.volume; } catch(e){} } event.stopPropagation();"
+                        onchange="const vol = parseFloat(this.value); const audio = audioElements['${soundId}']; if (audio) { try { audio.volume = vol; } catch(e){} } if (activeSounds['${soundId}']) { activeSounds['${soundId}'].volume = vol; try { const mem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}'); mem['${soundId}'] = vol; localStorage.setItem('soundboard-volumeMemory', JSON.stringify(mem)); } catch(e){} } event.stopPropagation();"
                         class="flex-1 h-1 rounded-lg appearance-none cursor-pointer"
                         style="background: linear-gradient(to right, rgb(168, 85, 247) 0%, rgb(168, 85, 247) ${sound.volume * 100}%, rgb(51, 65, 85) ${sound.volume * 100}%, rgb(51, 65, 85) 100%)" />
                 <span class="text-xs text-slate-400 w-10 flex-shrink-0 text-right">${Math.round(sound.volume * 100)}%</span>
@@ -2831,7 +2834,7 @@ if (activeSoundsCount > 0) {
                 <button onclick="resetVolume('${soundId}')" 
                     class="p-1.5 bg-slate-700 hover:bg-slate-600 rounded transition-colors" 
                     title="Reset to default volume">
-                    <span class="w-3.5 h-3.5 block">🔊</span>
+                    <span class="w-3.5 h-3.5 block">${icons.refresh}</span>
                 </button>
                 <button onclick="playSound('${soundId}', '${sound.name}', '${sound.url}', '${sound.category}', '${sound.icon}')" 
                     class="p-1.5 bg-slate-700 hover:bg-slate-600 rounded transition-colors">
