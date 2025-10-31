@@ -168,7 +168,7 @@ body.light-mode {
                 <button onclick="toggleLightMode()" class="px-3 py-2 rounded-full bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 text-sm md:text-base" aria-label="Toggle light mode">🌓</button>
                 <button onclick="openInfoModal()" class="px-3 py-2 rounded-full bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 text-sm md:text-base" aria-label="Info and Help">ℹ️</button>
             </div>
-            <div class="text-center pr-20">
+            <div class="text-center pl-20 pr-20 mx-auto max-w-full">
                 <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Bloopr</h1>
                 <div id="active-session-label" class="mt-1 text-slate-300 text-sm break-words px-2">Game Session: Default</div>
             </div>
@@ -198,10 +198,10 @@ body.light-mode {
         <!-- Favorites Section -->
         <div id="favorites-section" class="mb-4">
             <div class="mb-3">
-                <h2 class="text-xl font-semibold flex items-center gap-2">
-                    <svg class="w-5 h-5 fill-yellow-400 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+    <h2 class="text-xl font-semibold flex items-center gap-2">
+        <svg class="w-5 h-5 fill-yellow-400 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                     Favourites
-                </h2>
+    </h2>
             </div>
             <div class="flex flex-wrap gap-2 p-2 bg-slate-800/40 border border-slate-700 rounded-xl mb-3">
                 <button onclick="openSessionsModal()" class="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-sm">Game Sessions</button>
@@ -359,12 +359,12 @@ body.light-mode {
     <!-- Info Modal -->
     <div id="info-modal" class="hidden fixed inset-0 z-50">
         <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeInfoModal()"></div>
-        <div class="relative mx-auto mt-12 w-11/12 max-w-3xl bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
-            <div class="flex items-center justify-between p-4 border-b border-slate-700">
+        <div class="relative mx-auto mt-12 w-11/12 max-w-3xl bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-slate-700 flex-shrink-0">
                 <h3 class="text-lg font-semibold">Info & Help</h3>
                 <button onclick="closeInfoModal()" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded">Close</button>
             </div>
-            <div class="p-4 space-y-4 text-sm md:text-base">
+            <div class="p-4 space-y-4 text-sm md:text-base overflow-y-auto flex-1 scroll-area">
                 <div>
                     <h4 class="font-semibold mb-1">Playing Sounds</h4>
                     <ul class="list-disc pl-5 text-slate-300">
@@ -483,6 +483,7 @@ body.light-mode {
             <div class="flex items-center justify-between p-4 border-b border-slate-700 flex-shrink-0">
                 <h3 class="text-lg font-semibold">Scenes</h3>
                 <div class="flex gap-2">
+                    <button onclick="loadDefaultScenes()" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm">Load Default Scenes</button>
                     <button onclick="openCreateGroupModal()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 rounded text-sm">Create Scene</button>
                     <button onclick="closeGroupsModal()" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded">Close</button>
                 </div>
@@ -992,6 +993,58 @@ const presets = {
     }
 };
 
+// Default Scenes - predefined scenes users can load
+const defaultScenes = {
+    'Tavern Atmosphere': {
+        description: 'Warm tavern with crowd, music, and fireplace.',
+        soundIds: ['tavern-crowd', 'tavern-music', 'fireplace', 'pouring-ale'],
+        volumes: {},
+        delays: {}
+    },
+    'Horror Ambience': {
+        description: 'Eerie atmosphere with whispers and heartbeat.',
+        soundIds: ['heartbeat', 'whispers', 'ghost-whispers', 'ambience1'],
+        volumes: {},
+        delays: {}
+    },
+    'Battle Scene': {
+        description: 'Intense combat with swords, cries, and drums.',
+        soundIds: ['sword-clash', 'battle-cry1', 'war-drum', 'shield-block'],
+        volumes: {},
+        delays: {}
+    },
+    'Dungeon Exploration': {
+        description: 'Dark dungeon with dripping water and echoing steps.',
+        soundIds: ['dungeon-ambience', 'water-drip', 'echo-steps', 'torch'],
+        volumes: {},
+        delays: {}
+    },
+    'Forest Walk': {
+        description: 'Peaceful forest with birds and a babbling stream.',
+        soundIds: ['forest-ambience', 'birds', 'stream', 'wind-leaves'],
+        volumes: {},
+        delays: {}
+    },
+    'Coastal Town': {
+        description: 'Harbour sounds with seagulls and ship creaks.',
+        soundIds: ['harbor', 'seagulls', 'ship-creak', 'bell-tower'],
+        volumes: {},
+        delays: {}
+    },
+    'Magic Ritual': {
+        description: 'Mystical atmosphere with chanting and bells.',
+        soundIds: ['chanting', 'gong', 'bells', 'whisper-ritual'],
+        volumes: {},
+        delays: {}
+    },
+    'Storm Inside': {
+        description: 'Cozy interior during a storm.',
+        soundIds: ['rain-heavy', 'thunder', 'fireplace', 'clock-ticking'],
+        volumes: {},
+        delays: {}
+    }
+};
+
 function toggleCategory(category) {
     const index = expandedCategories.indexOf(category);
     if (index >= 0) {
@@ -1431,6 +1484,71 @@ function closeGroupsModal() {
     document.getElementById('groups-modal').classList.add('hidden');
 }
 
+function loadDefaultScenes() {
+    let loaded = 0;
+    let skipped = 0;
+    Object.entries(defaultScenes).forEach(([sceneName, sceneData]) => {
+        // Check if scene with this name already exists
+        const exists = soundGroups.some(g => g.name.toLowerCase() === sceneName.toLowerCase());
+        if (exists) {
+            skipped++;
+            return;
+        }
+        // Resolve sound IDs - filter out any that don't exist
+        const validSoundIds = [];
+        sceneData.soundIds.forEach(soundId => {
+            const found = findSoundById(soundId);
+            if (found) {
+                validSoundIds.push(soundId);
+            }
+        });
+        if (validSoundIds.length > 0) {
+            // Resolve volumes to sound IDs (they come as sound names in defaults)
+            const resolvedVolumes = {};
+            const resolvedDelays = {};
+            if (sceneData.volumes) {
+                Object.entries(sceneData.volumes).forEach(([soundName, vol]) => {
+                    const found = findSoundByName(soundName);
+                    if (found) {
+                        resolvedVolumes[found.sound.id] = vol;
+                    }
+                });
+            }
+            if (sceneData.delays) {
+                Object.entries(sceneData.delays).forEach(([soundName, delay]) => {
+                    const found = findSoundByName(soundName);
+                    if (found) {
+                        resolvedDelays[found.sound.id] = delay;
+                    }
+                });
+            }
+            soundGroups.push({
+                id: 'g_' + Date.now() + Math.random().toString(36).slice(2, 10),
+                name: sceneName,
+                soundIds: validSoundIds,
+                volumes: resolvedVolumes,
+                delays: resolvedDelays,
+                loop: sceneData.loop || false
+            });
+            loaded++;
+        }
+    });
+    if (loaded > 0 || skipped > 0) {
+        saveSoundGroups();
+        renderGroupsModal();
+        let msg = '';
+        if (loaded > 0) {
+            msg = `${loaded} default scene${loaded !== 1 ? 's' : ''} loaded.`;
+        }
+        if (skipped > 0) {
+            msg += (msg ? ' ' : '') + `${skipped} scene${skipped !== 1 ? 's' : ''} skipped (already exist).`;
+        }
+        showNotice(msg || 'Default scenes loaded.');
+    } else {
+        showNotice('No default scenes to load.');
+    }
+}
+
 function renderGroupsModal() {
     const container = document.getElementById('groups-list');
     if (!container) return;
@@ -1440,17 +1558,21 @@ function renderGroupsModal() {
     }
     const html = soundGroups.map((group, idx) => {
         const soundCount = group.soundIds.length;
+        const isLooping = group.loop || false;
         return `
             <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4 mb-3 cursor-pointer hover:border-emerald-500/70 transition-colors" onclick="playSoundGroup(${idx})">
-                <div class="flex items-center justify-between mb-2">
-                    <h4 class="font-semibold flex-1">${sanitizeText(group.name)}</h4>
-                    <div class="flex gap-2" onclick="event.stopPropagation()">
-                        <button onclick="openEditGroupModal(${idx})" class="px-3 py-1 text-xs rounded bg-slate-700 hover:bg-slate-600">Edit</button>
-                        <button onclick="openRenameGroupModal(${idx})" class="px-3 py-1 text-xs rounded bg-slate-700 hover:bg-slate-600">Rename</button>
-                        <button onclick="openConfirmDeleteGroup(${idx})" class="px-3 py-1 text-xs rounded bg-red-600 hover:bg-red-700">Delete</button>
+                <div class="mb-2">
+                    <div class="font-semibold mb-2">${sanitizeText(group.name)}</div>
+                    <div class="text-sm text-slate-400 mb-2">${soundCount} sound${soundCount !== 1 ? 's' : ''} • Tap to play</div>
+                    <div class="flex flex-wrap items-center gap-2" onclick="event.stopPropagation()">
+                        <button onclick="toggleSceneLoop(${idx})" class="px-3 py-2 text-sm rounded ${isLooping ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-700 hover:bg-slate-600'}">
+                            ${isLooping ? '🔁 Looping' : '↻ Loop Off'}
+                        </button>
+                        <button onclick="openEditGroupModal(${idx})" class="px-3 py-2 text-sm rounded bg-slate-700 hover:bg-slate-600">Edit</button>
+                        <button onclick="openRenameGroupModal(${idx})" class="px-3 py-2 text-sm rounded bg-slate-700 hover:bg-slate-600">Rename</button>
+                        <button onclick="openConfirmDeleteGroup(${idx})" class="px-3 py-2 text-sm rounded bg-red-600 hover:bg-red-700">Delete</button>
                     </div>
                 </div>
-                <div class="text-sm text-slate-400">${soundCount} sound${soundCount !== 1 ? 's' : ''} • Tap to play</div>
             </div>
         `;
     }).join('');
@@ -1530,8 +1652,14 @@ function updateGroupVolumesSection() {
         existingVolumes = soundGroups[createGroupEditingIndex].volumes || {};
     }
     
+    let existingDelays = {};
+    if (createGroupEditingIndex !== null && soundGroups[createGroupEditingIndex]) {
+        existingDelays = soundGroups[createGroupEditingIndex].delays || {};
+    }
+    
     const volumesHtml = selectedSounds.map(sound => {
         const defaultVol = existingVolumes[sound.id] !== undefined ? existingVolumes[sound.id] : getVolumeMemory(sound.id);
+        const currentDelay = existingDelays[sound.id] || 0;
         return `
             <div class="flex items-center gap-2 p-2 bg-slate-800/50 rounded border border-slate-700">
                 <span class="text-xl w-8">${sound.icon}</span>
@@ -1542,10 +1670,24 @@ function updateGroupVolumesSection() {
                     class="w-24 h-1 rounded-lg appearance-none cursor-pointer group-volume-slider"
                     style="background: linear-gradient(to right, rgb(168, 85, 247) 0%, rgb(168, 85, 247) ${defaultVol * 100}%, rgb(51, 65, 85) ${defaultVol * 100}%, rgb(51, 65, 85) 100%)" />
                 <span class="text-xs text-slate-400 w-10 text-right">${Math.round(defaultVol * 100)}%</span>
+                <button onclick="cycleSoundDelay('${sound.id}')" class="px-2 py-1 text-xs rounded bg-slate-700 hover:bg-slate-600 text-slate-200 delay-btn-${sound.id} min-w-[3.5rem]" data-sound-id="${sound.id}" data-delay="${currentDelay}">
+                    ${currentDelay === 0 ? 'None' : currentDelay + 's'}
+                </button>
             </div>
         `;
     }).join('');
     volumesList.innerHTML = volumesHtml;
+}
+
+function cycleSoundDelay(soundId) {
+    const btn = document.querySelector(`.delay-btn-${soundId}`);
+    if (!btn) return;
+    let currentDelay = parseInt(btn.getAttribute('data-delay') || '0');
+    // Cycle: 0 -> 5 -> 10 -> 15 -> 20 -> 25 -> 30 -> 0
+    currentDelay += 5;
+    if (currentDelay > 30) currentDelay = 0;
+    btn.setAttribute('data-delay', currentDelay);
+    btn.textContent = currentDelay === 0 ? 'None' : currentDelay + 's';
 }
 
 function saveSoundGroup() {
@@ -1573,6 +1715,15 @@ function saveSoundGroup() {
         volumes[soundId] = vol;
     });
     
+    // Get delays
+    const delayButtons = document.querySelectorAll('[class*="delay-btn-"]');
+    const delays = {};
+    delayButtons.forEach(btn => {
+        const soundId = btn.getAttribute('data-sound-id');
+        const delay = parseInt(btn.getAttribute('data-delay') || '0');
+        delays[soundId] = delay;
+    });
+    
     if (createGroupEditingIndex !== null) {
         // Update existing group
         const group = soundGroups[createGroupEditingIndex];
@@ -1585,6 +1736,9 @@ function saveSoundGroup() {
             group.name = name;
             group.soundIds = soundIds;
             group.volumes = volumes;
+            group.delays = delays;
+            // Preserve loop state
+            if (group.loop === undefined) group.loop = false;
         }
     } else {
         // Check for duplicate names
@@ -1593,7 +1747,7 @@ function saveSoundGroup() {
             return;
         }
         // Create new group
-        soundGroups.push({ id: 'g_' + Date.now(), name, soundIds, volumes });
+        soundGroups.push({ id: 'g_' + Date.now(), name, soundIds, volumes, delays, loop: false });
     }
     saveSoundGroups();
     closeCreateGroupModal();
@@ -1605,31 +1759,63 @@ function openEditGroupModal(groupIndex) {
     openCreateGroupModal(groupIndex);
 }
 
+function toggleSceneLoop(groupIndex) {
+    const group = soundGroups[groupIndex];
+    if (!group) return;
+    group.loop = !group.loop;
+    saveSoundGroups();
+    renderGroupsModal();
+}
+
 function playSoundGroup(groupIndex) {
     const group = soundGroups[groupIndex];
     if (!group) return;
     const volumes = group.volumes || {};
-    // Play all sounds in the group with their default volumes
+    const delays = group.delays || {};
+    const shouldLoop = group.loop || false;
+    
+    // Play all sounds in the group with their default volumes and delays
     group.soundIds.forEach(soundId => {
         const found = findSoundById(soundId);
         if (found) {
             const { sound, category } = found;
             const defaultVol = volumes[soundId] !== undefined ? volumes[soundId] : getVolumeMemory(sound.id);
+            const delay = delays[soundId] || 0;
+            
             // Set volume memory first so playSound uses it
             const volumeMem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}');
             volumeMem[sound.id] = defaultVol;
             localStorage.setItem('soundboard-volumeMemory', JSON.stringify(volumeMem));
-            playSound(sound.id, sound.name, sound.url, category, sound.icon);
-            // Ensure volume is set after playing
-            setTimeout(() => {
-                const audio = audioElements[sound.id];
-                if (audio) {
-                    audio.volume = defaultVol;
-                    if (activeSounds[sound.id]) {
-                        activeSounds[sound.id].volume = defaultVol;
-                    }
+            
+            // Play sound with delay
+            const playDelayedSound = () => {
+                // If scene looping is enabled AND sound has no delay, set loop before playing
+                // Sounds with delays should never loop (they're typically one-time events)
+                if (shouldLoop && delay === 0) {
+                    setLoopBeforePlay(sound.id, sound.name, sound.url, category, sound.icon);
+                    // Actually play it
+                    playSound(sound.id, sound.name, sound.url, category, sound.icon);
+                } else {
+                    playSound(sound.id, sound.name, sound.url, category, sound.icon);
                 }
-            }, 100);
+                
+                // Ensure volume is set after playing
+                setTimeout(() => {
+                    const audio = audioElements[sound.id];
+                    if (audio) {
+                        audio.volume = defaultVol;
+                        if (activeSounds[sound.id]) {
+                            activeSounds[sound.id].volume = defaultVol;
+                        }
+                    }
+                }, 100);
+            };
+            
+            if (delay > 0) {
+                setTimeout(playDelayedSound, delay * 1000);
+            } else {
+                playDelayedSound();
+            }
         }
     });
     closeGroupsModal();
@@ -1824,10 +2010,11 @@ function exportFavorites() {
     const names = (favorites||[]).map(f => f.name).filter(n => !!n);
     const unique = Array.from(new Set(names));
     
-    // Export scenes with sound names and volumes
+    // Export scenes with sound names, volumes, and delays
     const exportedScenes = (soundGroups || []).map(group => {
         const soundNames = [];
         const volumes = {};
+        const delays = {};
         group.soundIds.forEach(soundId => {
             const found = findSoundById(soundId);
             if (found) {
@@ -1835,12 +2022,17 @@ function exportFavorites() {
                 if (group.volumes && group.volumes[soundId] !== undefined) {
                     volumes[found.sound.name] = group.volumes[soundId];
                 }
+                if (group.delays && group.delays[soundId] !== undefined) {
+                    delays[found.sound.name] = group.delays[soundId];
+                }
             }
         });
         return {
             name: group.name,
             soundNames: soundNames,
-            volumes: volumes
+            volumes: volumes,
+            delays: delays,
+            loop: group.loop || false
         };
     });
     
@@ -1891,6 +2083,7 @@ function importFavoritesFromInput() {
                     
                     const sceneSoundIds = [];
                     const sceneVolumes = {};
+                    const sceneDelays = {};
                     sceneData.soundNames.forEach(soundName => {
                         const found = findSoundByName(soundName);
                         if (found) {
@@ -1902,6 +2095,13 @@ function importFavoritesFromInput() {
                                     sceneVolumes[found.sound.id] = vol;
                                 }
                             }
+                            // Get delay from imported data if available
+                            if (sceneData.delays && sceneData.delays[soundName] !== undefined) {
+                                const delay = parseInt(sceneData.delays[soundName]);
+                                if (!isNaN(delay) && delay >= 0 && delay <= 30) {
+                                    sceneDelays[found.sound.id] = delay;
+                                }
+                            }
                         } else {
                             scenesMissing++;
                         }
@@ -1910,17 +2110,22 @@ function importFavoritesFromInput() {
                     if (sceneSoundIds.length > 0) {
                         // Check for duplicate scene name
                         const existingIndex = soundGroups.findIndex(g => g.name.toLowerCase() === sceneName.toLowerCase());
+                        const importedLoop = sceneData.loop === true;
                         if (existingIndex >= 0) {
                             // Update existing scene
                             soundGroups[existingIndex].soundIds = sceneSoundIds;
                             soundGroups[existingIndex].volumes = sceneVolumes;
+                            soundGroups[existingIndex].delays = sceneDelays;
+                            soundGroups[existingIndex].loop = importedLoop;
                         } else {
                             // Create new scene
                             soundGroups.push({
                                 id: 'g_' + Date.now() + Math.random().toString(36).slice(2, 10),
                                 name: sceneName,
                                 soundIds: sceneSoundIds,
-                                volumes: sceneVolumes
+                                volumes: sceneVolumes,
+                                delays: sceneDelays,
+                                loop: importedLoop
                             });
                         }
                         scenesImported++;
