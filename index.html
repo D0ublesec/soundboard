@@ -909,7 +909,77 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // State Management
         let activeSounds = {};
-let audioElements = {};
+        let audioElements = {};
+        let audioContext = null;
+        let gainNodes = {}; // Store GainNodes for iOS volume control
+        
+        // Initialize Web Audio API context (required for iOS volume control)
+        function getAudioContext() {
+            if (!audioContext) {
+                try {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    audioContext = new AudioContextClass();
+                    // Resume context if suspended (iOS requirement)
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                } catch(e) {
+                    console.warn('Web Audio API not available, falling back to HTML5 audio');
+                }
+            }
+            return audioContext;
+        }
+        
+        // Create gain node for a sound (iOS volume control)
+        function getGainNode(soundId, audio) {
+            if (!audio || !audioContext) return null;
+            
+            // Return existing gain node if it exists
+            if (gainNodes[soundId]) {
+                return gainNodes[soundId];
+            }
+            
+            // Create new gain node
+            try {
+                // Ensure AudioContext is running (iOS requirement)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                // Create MediaElementAudioSourceNode from HTML audio element
+                // This disconnects the audio from its default output
+                const source = audioContext.createMediaElementSource(audio);
+                const gainNode = audioContext.createGain();
+                
+                // Connect: source -> gain -> destination
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // Set initial volume from memory
+                const savedVolume = getVolumeMemory(soundId);
+                gainNode.gain.value = savedVolume;
+                
+                gainNodes[soundId] = { source, gainNode };
+                return gainNodes[soundId];
+            } catch(e) {
+                // If createMediaElementSource fails (element already connected), return null
+                // This can happen if the audio element was already used to create a source
+                // In this case, we'll fall back to HTML5 audio volume
+                console.warn(`Could not create gain node for ${soundId}:`, e);
+                return null;
+            }
+        }
+        
+        // Set volume using Web Audio API (iOS compatible)
+        function setVolumeViaWebAudio(soundId, volume) {
+            const gainData = gainNodes[soundId];
+            if (gainData && gainData.gainNode) {
+                // Use Web Audio API gain node (works on iOS)
+                gainData.gainNode.gain.value = volume;
+                return true;
+            }
+            return false;
+        }
 let sessions = JSON.parse(localStorage.getItem('soundboard-sessions') || '[]');
 let currentSessionId = JSON.parse(localStorage.getItem('soundboard-currentSessionId') || 'null');
 function ensureDefaultSession() {
@@ -1943,7 +2013,7 @@ function toggleSceneLoop(groupIndex) {
 }
 
 // Fade out and stop all active sounds
-function fadeOutAllSounds(duration = 1000) {
+function fadeOutAllSounds(duration = 2000) {
     const fadeOutSounds = Object.entries(activeSounds).filter(([id, sound]) => sound.isPlaying);
     if (fadeOutSounds.length === 0) return Promise.resolve();
     
@@ -1964,6 +2034,9 @@ function fadeOutAllSounds(duration = 1000) {
                     const newVolume = startVolume * (1 - progress);
                     
                     if (audio && !audio.paused) {
+                        // Use Web Audio API for iOS compatibility
+                        setVolumeViaWebAudio(soundId, newVolume);
+                        // Also set HTML5 volume as fallback
                         try {
                             audio.volume = newVolume;
                         } catch(e) {}
@@ -1998,11 +2071,16 @@ function fadeOutAllSounds(duration = 1000) {
 }
 
 // Fade in a sound
-function fadeInSound(soundId, targetVolume, duration = 1000) {
+function fadeInSound(soundId, targetVolume, duration = 2000) {
     const audio = audioElements[soundId];
     if (!audio) return;
     
-    audio.volume = 0; // Start at 0
+    // Start at 0 volume using Web Audio API
+    setVolumeViaWebAudio(soundId, 0);
+    try {
+        audio.volume = 0;
+    } catch(e) {}
+    
     if (audio.paused) {
         audio.play().catch(() => {});
     }
@@ -2014,6 +2092,9 @@ function fadeInSound(soundId, targetVolume, duration = 1000) {
         const newVolume = targetVolume * progress;
         
         if (audio && !audio.paused) {
+            // Use Web Audio API for iOS compatibility
+            setVolumeViaWebAudio(soundId, newVolume);
+            // Also set HTML5 volume as fallback
             try {
                 audio.volume = newVolume;
             } catch(e) {}
@@ -2022,6 +2103,8 @@ function fadeInSound(soundId, targetVolume, duration = 1000) {
         if (progress >= 1) {
             clearInterval(fadeInterval);
             if (audio) {
+                // Final volume set using Web Audio API
+                setVolumeViaWebAudio(soundId, targetVolume);
                 try {
                     audio.volume = targetVolume;
                 } catch(e) {}
@@ -2037,9 +2120,9 @@ function playSoundGroup(groupIndex) {
     const delays = group.delays || {};
     const shouldLoop = group.loop || false;
     
-    // Fade out all currently active sounds first (1000ms fade out)
-    fadeOutAllSounds(1000).then(() => {
-            // Wait a brief moment after fade out completes before starting new scene
+    // Fade out all currently active sounds first (2000ms fade out)
+    fadeOutAllSounds(2000).then(() => {
+        // Wait a brief moment after fade out completes before starting new scene
         setTimeout(() => {
             // Play all sounds in the group with their default volumes and delays
             group.soundIds.forEach(soundId => {
@@ -2070,13 +2153,16 @@ function playSoundGroup(groupIndex) {
                         setTimeout(() => {
                             const audio = audioElements[sound.id];
                             if (audio && !audio.paused && activeSounds[sound.id]) {
-                                fadeInSound(sound.id, defaultVol, 1000);
+                                fadeInSound(sound.id, defaultVol, 2000);
                                 if (activeSounds[sound.id]) {
                                     activeSounds[sound.id].volume = defaultVol;
                                 }
                             } else if (audio) {
-                                // If not playing yet, set volume directly
-                                audio.volume = defaultVol;
+                                // If not playing yet, set volume directly using Web Audio API
+                                setVolumeViaWebAudio(sound.id, defaultVol);
+                                try {
+                                    audio.volume = defaultVol;
+                                } catch(e) {}
                                 if (activeSounds[sound.id]) {
                                     activeSounds[sound.id].volume = defaultVol;
                                 }
@@ -2084,10 +2170,19 @@ function playSoundGroup(groupIndex) {
                         }, 100);
                     };
                     
-                    // Account for delay: wait for delay time AFTER fade out completes
-                    // Then play the sound (which will fade in)
-                    const delayMs = delay * 1000;
-                    setTimeout(playSoundAndFadeIn, delayMs);
+                    // For sounds without delay: play immediately (will fade in over 2 seconds)
+                    // For sounds with delay: wait for fade in to complete (2000ms) + delay time, then play and fade in
+                    if (delay > 0) {
+                        // Wait for fade in to complete (2000ms for non-delayed sounds), then apply delay, then play
+                        setTimeout(() => {
+                            // After fade in completes, wait for delay time, then play
+                            const delayMs = delay * 1000;
+                            setTimeout(playSoundAndFadeIn, delayMs);
+                        }, 2000); // Wait for fade in to complete
+                    } else {
+                        // Play immediately (fade in will happen after play)
+                        playSoundAndFadeIn();
+                    }
                 }
             });
         }, 100); // Small buffer after fade out
@@ -2462,37 +2557,64 @@ function favoriteCategory(category) {
 
         // Initialize Audio Element
         function getAudioElement(soundId, url, loop = false) {
-    if (!audioElements[soundId]) {
-        const audio = new Audio(url);
-        audio.loop = loop;
-        audio.addEventListener('ended', () => {
-            if (!audio.loop) {
-                stopSound(soundId);
+            if (!audioElements[soundId]) {
+                // Initialize AudioContext first
+                getAudioContext();
+                
+                const audio = new Audio(url);
+                audio.loop = loop;
+                
+                // Set volume on audio element (fallback for non-iOS or if Web Audio fails)
+                const savedVolume = getVolumeMemory(soundId);
+                audio.volume = savedVolume;
+                
+                audio.addEventListener('ended', () => {
+                    if (!audio.loop) {
+                        stopSound(soundId);
+                    }
+                });
+                
+                let lastRenderTime = 0;
+                audio.addEventListener('timeupdate', () => {
+                    if (activeSounds[soundId]) {
+                        activeSounds[soundId].currentTime = audio.currentTime;
+                        activeSounds[soundId].duration = audio.duration;
+                        // Only render once per second to reduce flickering
+                        const now = Date.now();
+                        if (now - lastRenderTime > 1000) {
+                            lastRenderTime = now;
+                            render();
+                        }
+                    }
+                });
+                
+                audio.addEventListener('loadedmetadata', () => {
+                    if (activeSounds[soundId]) {
+                        activeSounds[soundId].duration = audio.duration;
+                        render();
+                    }
+                });
+                
+                audio.addEventListener('play', () => {
+                    // When audio starts playing, create gain node if it doesn't exist
+                    // This ensures Web Audio API connection is established
+                    if (audioContext && audioContext.state !== 'closed') {
+                        try {
+                            getGainNode(soundId, audio);
+                            // Resume context if suspended (iOS requirement)
+                            if (audioContext.state === 'suspended') {
+                                audioContext.resume();
+                            }
+                        } catch(e) {
+                            // Ignore errors - might already be connected
+                        }
+                    }
+                });
+                
+                audioElements[soundId] = audio;
             }
-        });
-        let lastRenderTime = 0;
-audio.addEventListener('timeupdate', () => {
-    if (activeSounds[soundId]) {
-        activeSounds[soundId].currentTime = audio.currentTime;
-        activeSounds[soundId].duration = audio.duration;
-        // Only render once per second to reduce flickering
-        const now = Date.now();
-        if (now - lastRenderTime > 1000) {
-            lastRenderTime = now;
-            render();
+            return audioElements[soundId];
         }
-    }
-});
-        audio.addEventListener('loadedmetadata', () => {
-            if (activeSounds[soundId]) {
-                activeSounds[soundId].duration = audio.duration;
-                render();
-            }
-        });
-        audioElements[soundId] = audio;
-    }
-    return audioElements[soundId];
-}
 
         // Play/Pause Sound
         function playSound(soundId, soundName, url, category, icon) {
@@ -2520,25 +2642,56 @@ audio.addEventListener('timeupdate', () => {
                 duckApplied: false,
                 originalVolume: undefined
             };
-            // Set volume before play() for iOS compatibility
+            
+            // Ensure gain node is created before setting volume (Web Audio API)
+            getGainNode(soundId, audio);
+            
+            // Set volume using Web Audio API (iOS compatible)
+            setVolumeViaWebAudio(soundId, savedVolume);
+            
+            // Also set HTML5 volume as fallback
             audio.volume = savedVolume;
         } else {
             // Resuming a paused sound - ensure volume is set
-            audio.volume = activeSounds[soundId].volume || getVolumeMemory(soundId);
+            const vol = activeSounds[soundId].volume || getVolumeMemory(soundId);
+            
+            // Ensure gain node exists
+            getGainNode(soundId, audio);
+            
+            // Set volume using Web Audio API
+            setVolumeViaWebAudio(soundId, vol);
+            
+            // Also set HTML5 volume as fallback
+            audio.volume = vol;
+            
             activeSounds[soundId].isPlaying = true;
         }
-        // For iOS, volume must be set before or immediately after play()
+        
+        // Resume AudioContext if suspended (iOS requirement)
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+        
+        // Play audio
         const playPromise = audio.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
-                // Volume set after play() completes (iOS fallback)
+                // Volume set after play() completes (Web Audio API)
                 if (activeSounds[soundId]) {
-                    audio.volume = activeSounds[soundId].volume || getVolumeMemory(soundId);
+                    const vol = activeSounds[soundId].volume || getVolumeMemory(soundId);
+                    setVolumeViaWebAudio(soundId, vol);
+                    try {
+                        audio.volume = vol;
+                    } catch(e) {}
                 }
             }).catch(() => {
                 // Play was interrupted, but volume should still be set
                 if (activeSounds[soundId]) {
-                    audio.volume = activeSounds[soundId].volume || getVolumeMemory(soundId);
+                    const vol = activeSounds[soundId].volume || getVolumeMemory(soundId);
+                    setVolumeViaWebAudio(soundId, vol);
+                    try {
+                        audio.volume = vol;
+                    } catch(e) {}
                 }
             });
         }
@@ -2619,15 +2772,21 @@ function setSmartMixBeforePlay(soundId, soundName, url, category, icon) {
 
         // Set Volume
         function setVolume(soundId, volume) {
-            // For iOS, volume must be set synchronously within user gesture context
+            // Use Web Audio API first (works on iOS)
+            const success = setVolumeViaWebAudio(soundId, volume);
+            
+            // Fallback to HTML5 audio volume
             const audio = audioElements[soundId];
-            if (audio) {
-                // Set volume immediately - must be synchronous for iOS
-                audio.volume = volume;
+            if (!success && audio) {
+                try {
+                    audio.volume = volume;
+                } catch(e) {}
             }
+            
             if (activeSounds[soundId]) {
-            activeSounds[soundId].volume = volume;
+                activeSounds[soundId].volume = volume;
             }
+            
             // Save volume memory (can be async)
             try {
                 const volumeMem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}');
@@ -2673,13 +2832,23 @@ function setSmartMixBeforePlay(soundId, soundName, url, category, icon) {
                         s.originalVolume = s.volume;
                         const newVol = Math.max(0, Math.min(1, s.volume * DUCK_FACTOR));
                         s.volume = newVol;
-                        audio.volume = newVol;
+                        // Use Web Audio API for iOS compatibility
+                        setVolumeViaWebAudio(id, newVol);
+                        // Also set HTML5 volume as fallback
+                        try {
+                            audio.volume = newVol;
+                        } catch(e) {}
                         s.duckApplied = true;
                     }
                 } else if (s.duckApplied) {
                     const restore = s.originalVolume != null ? s.originalVolume : s.volume;
                     s.volume = restore;
-                    audio.volume = restore;
+                    // Use Web Audio API for iOS compatibility
+                    setVolumeViaWebAudio(id, restore);
+                    // Also set HTML5 volume as fallback
+                    try {
+                        audio.volume = restore;
+                    } catch(e) {}
                     s.originalVolume = undefined;
                     s.duckApplied = false;
                 }
@@ -2949,12 +3118,17 @@ if (activeSoundsCount > 0) {
         if (slider) {
             const updateVolume = (vol) => {
                 const audio = audioElements[soundId];
-                if (audio) {
-                    // Direct synchronous volume set - critical for iOS
+                
+                // Try Web Audio API first (works on iOS)
+                const success = setVolumeViaWebAudio(soundId, vol);
+                
+                if (!success && audio) {
+                    // Fallback to HTML5 audio volume (for non-iOS or if Web Audio not available)
                     try {
                         audio.volume = vol;
                     } catch(e) {}
                 }
+                
                 if (activeSounds[soundId]) {
                     activeSounds[soundId].volume = vol;
                 }
@@ -2970,17 +3144,9 @@ if (activeSoundsCount > 0) {
             
             const handleInput = (e) => {
                 const vol = parseFloat(e.target.value);
-                const audio = audioElements[soundId];
                 
-                // For iOS: ensure audio is playing and set volume directly
-                if (audio && !audio.paused) {
-                    // Direct synchronous assignment - must be in user gesture
-                    audio.volume = vol;
-                }
-                
-                if (activeSounds[soundId]) {
-                    activeSounds[soundId].volume = vol;
-                }
+                // Use Web Audio API for iOS compatibility
+                updateVolume(vol);
                 saveVolume(vol);
                 e.stopPropagation();
             };
@@ -3018,16 +3184,23 @@ if (activeSoundsCount > 0) {
                     return;
                 }
                 
-                // Calculate volume from touch position for more reliable iOS handling
+                // Calculate volume from touch position
                 const rect = slider.getBoundingClientRect();
                 const touch = e.touches[0] || e.changedTouches[0];
                 const x = touch.clientX - rect.left;
                 const percentage = Math.max(0, Math.min(1, x / rect.width));
                 const vol = percentage;
                 
-                // Set volume immediately and synchronously - iOS requires this in the touch event
-                // No async, no delays, no calculations after this point
-                audio.volume = vol;
+                // Use Web Audio API for iOS compatibility
+                setVolumeViaWebAudio(soundId, vol);
+                
+                // Also set HTML5 volume as fallback
+                if (audio) {
+                    try {
+                        audio.volume = vol;
+                    } catch(e) {}
+                }
+                
                 slider.value = vol;
                 
                 // Update state immediately
@@ -3041,11 +3214,16 @@ if (activeSoundsCount > 0) {
             slider.addEventListener('touchend', (e) => {
                 isDragging = false;
                 const vol = parseFloat(e.target.value);
-                const audio = audioElements[soundId];
                 
-                // Final synchronous volume set on touch end
+                // Final volume set using Web Audio API
+                setVolumeViaWebAudio(soundId, vol);
+                
+                // Also set HTML5 volume as fallback
+                const audio = audioElements[soundId];
                 if (audio) {
-                    audio.volume = vol;
+                    try {
+                        audio.volume = vol;
+                    } catch(e) {}
                 }
                 
                 if (activeSounds[soundId]) {
