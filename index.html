@@ -2544,6 +2544,13 @@ function setSmartMixBeforePlay(soundId, soundName, url, category, icon) {
             const volumeMem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}');
             return volumeMem[soundId] !== undefined ? volumeMem[soundId] : 0.7;
         }
+        
+        // Reset Volume to Default
+        function resetVolume(soundId) {
+            const defaultVol = 0.7; // Default volume
+            setVolume(soundId, defaultVol);
+            render();
+        }
 
         function toggleSmartMix(soundId) {
             if (!activeSounds[soundId]) return;
@@ -2806,27 +2813,33 @@ if (activeSoundsCount > 0) {
             <div class="flex items-center gap-2 flex-1 min-w-0">
                     <span class="w-4 h-4 text-purple-400 flex-shrink-0">${icons.volume}</span>
                     <input type="range" min="0" max="1" step="0.01" value="${sound.volume}" 
-                        oninput="setVolume('${soundId}', parseFloat(this.value)); event.stopPropagation();"
+                        oninput="const vol = parseFloat(this.value); const audio = audioElements['${soundId}']; if (audio) audio.volume = vol; if (activeSounds['${soundId}']) { activeSounds['${soundId}'].volume = vol; try { const mem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}'); mem['${soundId}'] = vol; localStorage.setItem('soundboard-volumeMemory', JSON.stringify(mem)); } catch(e){} } event.stopPropagation();"
+                        ontouchmove="const vol = parseFloat(this.value); const audio = audioElements['${soundId}']; if (audio) audio.volume = vol; if (activeSounds['${soundId}']) activeSounds['${soundId}'].volume = vol; event.stopPropagation();"
                         ontouchstart="event.stopPropagation();"
-                        onchange="setVolume('${soundId}', parseFloat(this.value)); event.stopPropagation();"
+                        onchange="const vol = parseFloat(this.value); const audio = audioElements['${soundId}']; if (audio) audio.volume = vol; if (activeSounds['${soundId}']) { activeSounds['${soundId}'].volume = vol; try { const mem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}'); mem['${soundId}'] = vol; localStorage.setItem('soundboard-volumeMemory', JSON.stringify(mem)); } catch(e){} } event.stopPropagation();"
                         class="flex-1 h-1 rounded-lg appearance-none cursor-pointer"
                         style="background: linear-gradient(to right, rgb(168, 85, 247) 0%, rgb(168, 85, 247) ${sound.volume * 100}%, rgb(51, 65, 85) ${sound.volume * 100}%, rgb(51, 65, 85) 100%)" />
                 <span class="text-xs text-slate-400 w-10 flex-shrink-0 text-right">${Math.round(sound.volume * 100)}%</span>
                 </div>
-            <div class="flex gap-1">
-                <button onclick="toggleSmartMix('${soundId}')" class="px-2 py-1 text-[10px] rounded ${sound.smartMix ? 'bg-pink-600 hover:bg-pink-700 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'}" title="Toggle priority smart mix">${sound.smartMix ? 'Priority' : 'Normal'}</button>
+            <div class="flex gap-1 items-center flex-nowrap">
+                <button onclick="toggleSmartMix('${soundId}')" class="px-1.5 py-1 text-[9px] rounded ${sound.smartMix ? 'bg-pink-600 hover:bg-pink-700 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'}" title="Toggle priority smart mix">${sound.smartMix ? 'Pri' : 'Norm'}</button>
                 <button onclick="toggleLoop('${soundId}')" 
-                    class="p-2 rounded transition-colors ${sound.loop ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-700 hover:bg-slate-600'}" 
+                    class="p-1.5 rounded transition-colors ${sound.loop ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-700 hover:bg-slate-600'}" 
                     title="${sound.loop ? 'Looping' : 'Play once'}">
-                    <span class="w-4 h-4 block">${sound.loop ? icons.repeat : icons.repeat1}</span>
+                    <span class="w-3.5 h-3.5 block">${sound.loop ? icons.repeat : icons.repeat1}</span>
+                </button>
+                <button onclick="resetVolume('${soundId}')" 
+                    class="p-1.5 bg-slate-700 hover:bg-slate-600 rounded transition-colors" 
+                    title="Reset to default volume">
+                    <span class="w-3.5 h-3.5 block">🔊</span>
                 </button>
                 <button onclick="playSound('${soundId}', '${sound.name}', '${sound.url}', '${sound.category}', '${sound.icon}')" 
-                    class="p-2 bg-slate-700 hover:bg-slate-600 rounded transition-colors">
-                    <span class="w-4 h-4 block">${sound.isPlaying ? icons.pause : icons.play}</span>
+                    class="p-1.5 bg-slate-700 hover:bg-slate-600 rounded transition-colors">
+                    <span class="w-3.5 h-3.5 block">${sound.isPlaying ? icons.pause : icons.play}</span>
                 </button>
                 <button onclick="stopSound('${soundId}')" 
-                    class="p-2 bg-red-600 hover:bg-red-700 rounded transition-colors">
-                    <span class="w-4 h-4 block">${icons.square}</span>
+                    class="p-1.5 bg-red-600 hover:bg-red-700 rounded transition-colors">
+                    <span class="w-3.5 h-3.5 block">${icons.square}</span>
                 </button>
             </div>
         </div>
