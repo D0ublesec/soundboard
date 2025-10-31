@@ -3143,6 +3143,12 @@ if (activeSoundsCount > 0) {
             };
             
             const handleInput = (e) => {
+                // Skip if we're manually updating the slider during touch
+                if (isUpdatingSlider) {
+                    e.stopPropagation();
+                    return;
+                }
+                
                 const vol = parseFloat(e.target.value);
                 
                 // Use Web Audio API for iOS compatibility
@@ -3159,8 +3165,11 @@ if (activeSoundsCount > 0) {
             // iOS-specific touch handlers - direct synchronous volume setting
             let touchStartVol = null;
             let isDragging = false;
+            let isUpdatingSlider = false; // Prevent recursive updates
+            
             slider.addEventListener('touchstart', (e) => {
                 isDragging = true;
+                isUpdatingSlider = false;
                 const audio = audioElements[soundId];
                 if (audio) {
                     touchStartVol = audio.volume;
@@ -3175,45 +3184,75 @@ if (activeSoundsCount > 0) {
             }, { passive: false, capture: false });
             
             slider.addEventListener('touchmove', (e) => {
-                if (!isDragging) return;
-                e.preventDefault(); // Prevent default to ensure gesture context
-                const audio = audioElements[soundId];
+                if (!isDragging || isUpdatingSlider) return;
+                e.preventDefault(); // Prevent default slider behavior
+                e.stopPropagation();
                 
+                const audio = audioElements[soundId];
                 if (!audio || audio.paused) {
-                    e.stopPropagation();
                     return;
                 }
                 
                 // Calculate volume from touch position
                 const rect = slider.getBoundingClientRect();
                 const touch = e.touches[0] || e.changedTouches[0];
+                if (!touch) return;
+                
                 const x = touch.clientX - rect.left;
                 const percentage = Math.max(0, Math.min(1, x / rect.width));
                 const vol = percentage;
+                
+                // Set flag to prevent input event from interfering
+                isUpdatingSlider = true;
+                
+                // Update slider value FIRST so visual position matches
+                slider.value = vol;
+                
+                // Update background gradient
+                slider.style.background = `linear-gradient(to right, rgb(168, 85, 247) 0%, rgb(168, 85, 247) ${vol * 100}%, rgb(51, 65, 85) ${vol * 100}%, rgb(51, 65, 85) 100%)`;
                 
                 // Use Web Audio API for iOS compatibility
                 setVolumeViaWebAudio(soundId, vol);
                 
                 // Also set HTML5 volume as fallback
-                if (audio) {
-                    try {
-                        audio.volume = vol;
-                    } catch(e) {}
-                }
-                
-                slider.value = vol;
+                try {
+                    audio.volume = vol;
+                } catch(e) {}
                 
                 // Update state immediately
                 if (activeSounds[soundId]) {
                     activeSounds[soundId].volume = vol;
                 }
                 
-                e.stopPropagation();
+                // Clear flag after a brief moment to allow normal input events
+                setTimeout(() => {
+                    isUpdatingSlider = false;
+                }, 50);
             }, { passive: false, capture: false });
             
             slider.addEventListener('touchend', (e) => {
+                if (!isDragging) return;
+                
                 isDragging = false;
-                const vol = parseFloat(e.target.value);
+                isUpdatingSlider = false;
+                
+                // Get final volume from slider value or calculate from touch position
+                let vol;
+                const touch = e.changedTouches[0];
+                if (touch) {
+                    // Calculate from final touch position
+                    const rect = slider.getBoundingClientRect();
+                    const x = touch.clientX - rect.left;
+                    const percentage = Math.max(0, Math.min(1, x / rect.width));
+                    vol = percentage;
+                } else {
+                    // Fallback to slider value
+                    vol = parseFloat(slider.value);
+                }
+                
+                // Ensure slider value matches
+                slider.value = vol;
+                slider.style.background = `linear-gradient(to right, rgb(168, 85, 247) 0%, rgb(168, 85, 247) ${vol * 100}%, rgb(51, 65, 85) ${vol * 100}%, rgb(51, 65, 85) 100%)`;
                 
                 // Final volume set using Web Audio API
                 setVolumeViaWebAudio(soundId, vol);
@@ -3238,7 +3277,16 @@ if (activeSoundsCount > 0) {
             // Also handle touchcancel
             slider.addEventListener('touchcancel', (e) => {
                 isDragging = false;
+                isUpdatingSlider = false;
                 e.stopPropagation();
+            }, { passive: false });
+            
+            // Update gradient when input event fires (for tap-to-jump behavior)
+            slider.addEventListener('input', (e) => {
+                if (!isUpdatingSlider) {
+                    const vol = parseFloat(e.target.value);
+                    slider.style.background = `linear-gradient(to right, rgb(168, 85, 247) 0%, rgb(168, 85, 247) ${vol * 100}%, rgb(51, 65, 85) ${vol * 100}%, rgb(51, 65, 85) 100%)`;
+                }
             }, { passive: false });
             
             slider.addEventListener('pointermove', (e) => {
