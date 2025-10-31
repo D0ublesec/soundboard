@@ -616,8 +616,8 @@ body.light-mode {
         { id: 'pouring-ale', name: 'Pouring Ale', url: '/sounds/tavern/ale.wav', icon: '🍻' },
         { id: 'dice-roll', name: 'Dice on Table', url: '/sounds/tavern/dice.mp3', icon: '🎲' },
         { id: 'chair-scrape', name: 'Chair Scraping', url: '/sounds/tavern/chair.mp3', icon: '🪑' },
-        { id: 'bard-song 1', name: 'Bard Song', url: '/sounds/tavern/bard1.wav', icon: '🎤' },
-		{ id: 'bard-song 2', name: 'Bard Song', url: '/sounds/tavern/bard2.wav', icon: '🎤' },
+        { id: 'bard-song 1', name: 'Bard Song 1', url: '/sounds/tavern/bard1.wav', icon: '🎤' },
+		{ id: 'bard-song 2', name: 'Bard Song 2', url: '/sounds/tavern/bard2.wav', icon: '🎤' },
         { id: 'mug-clink', name: 'Mugs Clinking', url: '/sounds/tavern/mugs.wav', icon: '🍺' },
         { id: 'fiddle-tune', name: 'Fiddle Tune', url: '/sounds/tavern/fiddle.wav', icon: '🎻' },
         { id: 'plate-clatter', name: 'Plates Clattering', url: '/sounds/tavern/plate.wav', icon: '🍽️' },
@@ -2527,7 +2527,7 @@ function setSmartMixBeforePlay(soundId, soundName, url, category, icon) {
                 audio.volume = volume;
             }
             if (activeSounds[soundId]) {
-                activeSounds[soundId].volume = volume;
+            activeSounds[soundId].volume = volume;
             }
             // Save volume memory (can be async)
             try {
@@ -2715,7 +2715,7 @@ const categoriesHtml = Object.keys(soundLibrary).map(category => {
                                     ${isActive?.isPlaying ? '<div class="mt-1 flex gap-1"><span class="w-1.5 h-2 bg-green-400 animate-pulse"></span><span class="w-1.5 h-3 bg-green-300 animate-pulse"></span><span class="w-1.5 h-2 bg-green-400 animate-pulse"></span></div>' : ''}
                                     <div class="mt-1 flex flex-wrap justify-center gap-1">
                                         ${getTags(sound.name, category).map(t => `<span class=\"px-1.5 py-0.5 rounded-full text-[10px] bg-slate-700 text-slate-300\">${t}</span>`).join('')}
-                                    </div>
+                                </div>
                                 </div>
                                 <button onclick="event.stopPropagation(); ${isActive ? `toggleLoop('${sound.id}')` : `setLoopBeforePlay('${sound.id}', '${sound.name}', '${sound.url}', '${category}', '${sound.icon}')`}" 
                                     class="w-full mt-1 px-2 py-1 rounded text-xs font-medium transition-all flex items-center justify-center gap-1 ${
@@ -2814,18 +2814,13 @@ if (activeSoundsCount > 0) {
             <div class="flex items-center gap-2 flex-1 min-w-0">
                     <span class="w-4 h-4 text-purple-400 flex-shrink-0">${icons.volume}</span>
                     <input type="range" min="0" max="1" step="0.01" value="${sound.volume}" 
-                        onpointerdown="const audio = audioElements['${soundId}']; if (audio) audio.volume = audio.volume;"
-                        onpointermove="const vol = parseFloat(this.value); const audio = audioElements['${soundId}']; if (audio) { try { audio.volume = vol; } catch(e){} } if (activeSounds['${soundId}']) activeSounds['${soundId}'].volume = vol; event.stopPropagation();"
-                        oninput="const vol = parseFloat(this.value); const audio = audioElements['${soundId}']; if (audio) { try { audio.volume = vol; } catch(e){} } if (activeSounds['${soundId}']) { activeSounds['${soundId}'].volume = vol; try { const mem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}'); mem['${soundId}'] = vol; localStorage.setItem('soundboard-volumeMemory', JSON.stringify(mem)); } catch(e){} } event.stopPropagation();"
-                        ontouchmove="const vol = parseFloat(this.value); const audio = audioElements['${soundId}']; if (audio) { try { audio.volume = vol; } catch(e){} } if (activeSounds['${soundId}']) activeSounds['${soundId}'].volume = vol; event.stopPropagation();"
-                        ontouchstart="const audio = audioElements['${soundId}']; if (audio) { try { audio.volume = audio.volume; } catch(e){} } event.stopPropagation();"
-                        onchange="const vol = parseFloat(this.value); const audio = audioElements['${soundId}']; if (audio) { try { audio.volume = vol; } catch(e){} } if (activeSounds['${soundId}']) { activeSounds['${soundId}'].volume = vol; try { const mem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}'); mem['${soundId}'] = vol; localStorage.setItem('soundboard-volumeMemory', JSON.stringify(mem)); } catch(e){} } event.stopPropagation();"
-                        class="flex-1 h-1 rounded-lg appearance-none cursor-pointer"
+                        id="volume-slider-${soundId}"
+                        class="flex-1 h-1 rounded-lg appearance-none cursor-pointer volume-slider-active"
                         style="background: linear-gradient(to right, rgb(168, 85, 247) 0%, rgb(168, 85, 247) ${sound.volume * 100}%, rgb(51, 65, 85) ${sound.volume * 100}%, rgb(51, 65, 85) 100%)" />
                 <span class="text-xs text-slate-400 w-10 flex-shrink-0 text-right">${Math.round(sound.volume * 100)}%</span>
                 </div>
             <div class="flex gap-1 items-center flex-nowrap">
-                <button onclick="toggleSmartMix('${soundId}')" class="px-1.5 py-1 text-[9px] rounded ${sound.smartMix ? 'bg-pink-600 hover:bg-pink-700 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'}" title="Toggle priority smart mix">${sound.smartMix ? 'Pri' : 'Norm'}</button>
+                <button onclick="toggleSmartMix('${soundId}')" class="px-2 py-1 text-xs rounded ${sound.smartMix ? 'bg-pink-600 hover:bg-pink-700 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'}" title="Toggle priority smart mix">${sound.smartMix ? 'Priority' : 'Normal'}</button>
                 <button onclick="toggleLoop('${soundId}')" 
                     class="p-1.5 rounded transition-colors ${sound.loop ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-700 hover:bg-slate-600'}" 
                     title="${sound.loop ? 'Looping' : 'Play once'}">
@@ -2848,6 +2843,85 @@ if (activeSoundsCount > 0) {
         </div>
     `).join('');
     document.getElementById('active-sounds-grid').innerHTML = activeHtml;
+    
+    // Attach event listeners to volume sliders for iOS compatibility
+    playingEntries.forEach(([soundId, sound]) => {
+        const slider = document.getElementById(`volume-slider-${soundId}`);
+        if (slider) {
+            const updateVolume = (vol) => {
+                const audio = audioElements[soundId];
+                if (audio) {
+                    audio.volume = vol;
+                }
+                if (activeSounds[soundId]) {
+                    activeSounds[soundId].volume = vol;
+                }
+            };
+            
+            const saveVolume = (vol) => {
+                try {
+                    const mem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}');
+                    mem[soundId] = vol;
+                    localStorage.setItem('soundboard-volumeMemory', JSON.stringify(mem));
+                } catch(e) {}
+            };
+            
+            const handleInput = (e) => {
+                const vol = parseFloat(e.target.value);
+                updateVolume(vol);
+                saveVolume(vol);
+                e.stopPropagation();
+            };
+            
+            // Use multiple event types for iOS compatibility
+            slider.addEventListener('input', handleInput, { passive: false });
+            slider.addEventListener('change', handleInput, { passive: false });
+            slider.addEventListener('touchstart', (e) => {
+                // Establish gesture context for iOS - ensure audio is "unlocked"
+                const audio = audioElements[soundId];
+                if (audio && audio.paused === false) {
+                    // Audio is playing, ensure volume property is accessible
+                    audio.volume = audio.volume;
+                }
+                e.stopPropagation();
+            }, { passive: false });
+            slider.addEventListener('touchmove', (e) => {
+                const vol = parseFloat(e.target.value);
+                updateVolume(vol);
+                e.stopPropagation();
+            }, { passive: false });
+            slider.addEventListener('touchend', (e) => {
+                const vol = parseFloat(e.target.value);
+                updateVolume(vol);
+                saveVolume(vol);
+                e.stopPropagation();
+            }, { passive: false });
+            slider.addEventListener('pointermove', (e) => {
+                const vol = parseFloat(e.target.value);
+                updateVolume(vol);
+                e.stopPropagation();
+            }, { passive: false });
+            slider.addEventListener('pointerup', (e) => {
+                const vol = parseFloat(e.target.value);
+                updateVolume(vol);
+                saveVolume(vol);
+                e.stopPropagation();
+            }, { passive: false });
+            
+            // Update background gradient on change
+            const updateGradient = () => {
+                const vol = parseFloat(slider.value);
+                slider.style.background = `linear-gradient(to right, rgb(168, 85, 247) 0%, rgb(168, 85, 247) ${vol * 100}%, rgb(51, 65, 85) ${vol * 100}%, rgb(51, 65, 85) 100%)`;
+                const percentDisplay = slider.nextElementSibling;
+                if (percentDisplay) {
+                    percentDisplay.textContent = Math.round(vol * 100) + '%';
+                }
+            };
+            
+            slider.addEventListener('input', updateGradient);
+            slider.addEventListener('change', updateGradient);
+        }
+    });
 } else {
     activeBar.classList.add('hidden');
 }
