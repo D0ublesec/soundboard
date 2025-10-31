@@ -454,7 +454,7 @@ body.light-mode {
     </div>
 
     <!-- Notice Modal -->
-    <div id="notice-modal" class="hidden fixed inset-0 z-50">
+    <div id="notice-modal" class="hidden fixed inset-0 z-[60]">
         <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeNotice()"></div>
         <div class="relative mx-auto mt-24 w-11/12 max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
             <div class="p-4 border-b border-slate-700">
@@ -1661,13 +1661,24 @@ function loadDefaultScenes() {
                     }
                 });
             }
+            // Resolve loops (per-sound loop settings) if they exist
+            const resolvedLoops = {};
+            if (sceneData.loops) {
+                Object.entries(sceneData.loops).forEach(([soundName, loop]) => {
+                    const found = findSoundByName(soundName);
+                    if (found && loop) {
+                        resolvedLoops[found.sound.id] = true;
+                    }
+                });
+            }
             soundGroups.push({
                 id: 'g_' + Date.now() + Math.random().toString(36).slice(2, 10),
                 name: sceneName,
                 soundIds: validSoundIds,
                 volumes: resolvedVolumes,
                 delays: resolvedDelays,
-                loop: sceneData.loop || false
+                loops: resolvedLoops, // Per-sound loop settings
+                loop: sceneData.loop || false // Scene-level loop
             });
             loaded++;
         }
@@ -1900,16 +1911,22 @@ function updateGroupVolumesSection() {
         existingDelays = soundGroups[createGroupEditingIndex].delays || {};
     }
     
+    let existingLoops = {};
+    if (createGroupEditingIndex !== null && soundGroups[createGroupEditingIndex]) {
+        existingLoops = soundGroups[createGroupEditingIndex].loops || {};
+    }
+    
     const volumesHtml = selectedSounds.map(sound => {
         const defaultVol = existingVolumes[sound.id] !== undefined ? existingVolumes[sound.id] : getVolumeMemory(sound.id);
         const currentDelay = existingDelays[sound.id] || 0;
+        const soundLoop = existingLoops[sound.id] || false;
         return `
             <div class="p-2 bg-slate-800/50 rounded border border-slate-700">
                 <div class="flex items-center gap-2 mb-2">
                     <span class="text-xl w-8">${sound.icon}</span>
                     <span class="text-sm flex-1">${sound.name}</span>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 mb-2">
                     <input type="range" min="0" max="1" step="0.01" value="${defaultVol}" 
                         oninput="this.nextElementSibling.textContent = Math.round(this.value * 100) + '%'"
                         data-sound-id="${sound.id}"
@@ -1919,6 +1936,12 @@ function updateGroupVolumesSection() {
                     <button onclick="cycleSoundDelay('${sound.id}')" class="px-2 py-1 text-xs rounded bg-slate-700 hover:bg-slate-600 text-slate-200 delay-btn-${sound.id} min-w-[3.5rem]" data-sound-id="${sound.id}" data-delay="${currentDelay}">
                         ${currentDelay === 0 ? 'None' : currentDelay + 's'}
                     </button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="sound-loop-checkbox rounded" data-sound-id="${sound.id}" ${soundLoop ? 'checked' : ''} />
+                        <span class="text-xs text-slate-300">Loop this sound</span>
+                    </label>
                 </div>
             </div>
         `;
@@ -1971,6 +1994,14 @@ function saveSoundGroup() {
         delays[soundId] = delay;
     });
     
+    // Get loops (per-sound loop settings)
+    const loopCheckboxes = document.querySelectorAll('.sound-loop-checkbox:checked');
+    const loops = {};
+    loopCheckboxes.forEach(checkbox => {
+        const soundId = checkbox.getAttribute('data-sound-id');
+        loops[soundId] = true;
+    });
+    
     if (createGroupEditingIndex !== null) {
         // Update existing group
         const group = soundGroups[createGroupEditingIndex];
@@ -1984,7 +2015,8 @@ function saveSoundGroup() {
             group.soundIds = soundIds;
             group.volumes = volumes;
             group.delays = delays;
-            // Preserve loop state
+            group.loops = loops; // Store per-sound loop settings
+            // Preserve scene loop state
             if (group.loop === undefined) group.loop = false;
         }
     } else {
@@ -1994,7 +2026,7 @@ function saveSoundGroup() {
             return;
         }
         // Create new group
-        soundGroups.push({ id: 'g_' + Date.now(), name, soundIds, volumes, delays, loop: false });
+        soundGroups.push({ id: 'g_' + Date.now(), name, soundIds, volumes, delays, loops, loop: false });
     }
     saveSoundGroups();
     closeCreateGroupModal();
@@ -2120,6 +2152,7 @@ function playSoundGroup(groupIndex) {
     if (!group) return;
     const volumes = group.volumes || {};
     const delays = group.delays || {};
+    const soundLoops = group.loops || {}; // Per-sound loop settings
     const shouldLoop = group.loop || false;
     
     // Clear any previous scene timeouts and intervals
@@ -2143,6 +2176,7 @@ function playSoundGroup(groupIndex) {
                     const { sound, category } = found;
                     const defaultVol = volumes[soundId] !== undefined ? volumes[soundId] : getVolumeMemory(sound.id);
                     const delay = delays[soundId] || 0;
+                    const soundShouldLoop = soundLoops[soundId] || false; // Per-sound loop override
                     
                     // Set volume memory first so playSound uses it
                     const volumeMem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}');
@@ -2159,15 +2193,17 @@ function playSoundGroup(groupIndex) {
                             audio.volume = 0;
                         } catch(e) {}
                         
-                        // If scene looping is enabled AND sound has no delay, set loop before playing
-                        // Sounds with delays should never loop (they're typically one-time events)
-                        if (shouldLoop && delay === 0) {
+                        // Determine if this sound should loop:
+                        // 1. Per-sound loop override (soundLoops) takes highest priority
+                        // 2. Scene loop (shouldLoop) applies only if no per-sound loop is set AND no delay
+                        // 3. Delayed sounds only loop if explicitly set via per-sound loop
+                        const willLoop = soundShouldLoop || (shouldLoop && delay === 0 && !soundShouldLoop);
+                        
+                        if (willLoop) {
                             setLoopBeforePlay(sound.id, sound.name, sound.url, category, sound.icon);
-                            // Actually play it
-                            playSound(sound.id, sound.name, sound.url, category, sound.icon);
-                        } else {
-                            playSound(sound.id, sound.name, sound.url, category, sound.icon);
                         }
+                        // Actually play it
+                        playSound(sound.id, sound.name, sound.url, category, sound.icon);
                         
                         // Ensure volume is 0 immediately after play
                         // Use requestAnimationFrame to ensure volume stays at 0 until fade-in starts
@@ -2448,11 +2484,12 @@ function exportFavorites() {
     const names = (favorites||[]).map(f => f.name).filter(n => !!n);
     const unique = Array.from(new Set(names));
     
-    // Export scenes with sound names, volumes, and delays
+    // Export scenes with sound names, volumes, delays, and per-sound loops
     const exportedScenes = (soundGroups || []).map(group => {
         const soundNames = [];
         const volumes = {};
         const delays = {};
+        const loops = {};
         group.soundIds.forEach(soundId => {
             const found = findSoundById(soundId);
             if (found) {
@@ -2463,6 +2500,9 @@ function exportFavorites() {
                 if (group.delays && group.delays[soundId] !== undefined) {
                     delays[found.sound.name] = group.delays[soundId];
                 }
+                if (group.loops && group.loops[soundId]) {
+                    loops[found.sound.name] = true;
+                }
             }
         });
         return {
@@ -2470,7 +2510,8 @@ function exportFavorites() {
             soundNames: soundNames,
             volumes: volumes,
             delays: delays,
-            loop: group.loop || false
+            loops: loops, // Per-sound loop settings
+            loop: group.loop || false // Scene-level loop
         };
     });
     
@@ -2522,6 +2563,7 @@ function importFavoritesFromInput() {
                     const sceneSoundIds = [];
                     const sceneVolumes = {};
                     const sceneDelays = {};
+                    const sceneLoops = {};
                     sceneData.soundNames.forEach(soundName => {
                         const found = findSoundByName(soundName);
                         if (found) {
@@ -2540,6 +2582,10 @@ function importFavoritesFromInput() {
                                     sceneDelays[found.sound.id] = delay;
                                 }
                             }
+                            // Get per-sound loop from imported data if available
+                            if (sceneData.loops && sceneData.loops[soundName] === true) {
+                                sceneLoops[found.sound.id] = true;
+                            }
                         } else {
                             scenesMissing++;
                         }
@@ -2554,7 +2600,8 @@ function importFavoritesFromInput() {
                             soundGroups[existingIndex].soundIds = sceneSoundIds;
                             soundGroups[existingIndex].volumes = sceneVolumes;
                             soundGroups[existingIndex].delays = sceneDelays;
-                            soundGroups[existingIndex].loop = importedLoop;
+                            soundGroups[existingIndex].loops = sceneLoops; // Per-sound loops
+                            soundGroups[existingIndex].loop = importedLoop; // Scene-level loop
                         } else {
                             // Create new scene
                             soundGroups.push({
@@ -2563,7 +2610,8 @@ function importFavoritesFromInput() {
                                 soundIds: sceneSoundIds,
                                 volumes: sceneVolumes,
                                 delays: sceneDelays,
-                                loop: importedLoop
+                                loops: sceneLoops, // Per-sound loops
+                                loop: importedLoop // Scene-level loop
                             });
                         }
                         scenesImported++;
