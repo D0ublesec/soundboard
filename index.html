@@ -1937,16 +1937,29 @@ function updateGroupVolumesSection() {
                         ${currentDelay === 0 ? 'None' : currentDelay + 's'}
                     </button>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 justify-between">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" class="sound-loop-checkbox rounded" data-sound-id="${sound.id}" ${soundLoop ? 'checked' : ''} />
                         <span class="text-xs text-slate-300">Loop this sound</span>
                     </label>
+                    <button onclick="removeSoundFromGroup('${sound.id}')" class="px-2 py-1 text-xs rounded bg-red-600 hover:bg-red-700 text-white" title="Remove from scene">
+                        Remove
+                    </button>
                 </div>
             </div>
         `;
     }).join('');
     volumesList.innerHTML = volumesHtml;
+}
+
+function removeSoundFromGroup(soundId) {
+    // Find and uncheck the checkbox in the main list
+    const checkbox = document.querySelector(`.group-sound-checkbox[value="${soundId}"]`);
+    if (checkbox) {
+        checkbox.checked = false;
+        // Trigger update to refresh the volumes section
+        updateGroupVolumesSection();
+    }
 }
 
 function cycleSoundDelay(soundId) {
