@@ -55,6 +55,83 @@
     </style>
 <style>
 .scroll-area { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+
+/* Dice Rolling Animation */
+.dice-rolling {
+    animation: diceRoll 1s ease-in-out;
+}
+
+@keyframes diceRoll {
+    0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(0.8); opacity: 0.5; }
+    25% { transform: rotateX(180deg) rotateY(90deg) rotateZ(45deg) scale(1.1); opacity: 0.8; }
+    50% { transform: rotateX(360deg) rotateY(180deg) rotateZ(90deg) scale(0.9); opacity: 0.9; }
+    75% { transform: rotateX(540deg) rotateY(270deg) rotateZ(135deg) scale(1.05); opacity: 1; }
+    100% { transform: rotateX(720deg) rotateY(360deg) rotateZ(180deg) scale(1); opacity: 1; }
+}
+
+/* Coin Flipping Animation */
+.coin-flipping {
+    animation: coinFlip 0.8s ease-in-out;
+}
+
+@keyframes coinFlip {
+    0% { transform: rotateY(0deg) scale(0.8); }
+    25% { transform: rotateY(90deg) scale(1.1); opacity: 0.7; }
+    50% { transform: rotateY(180deg) scale(1); opacity: 0.5; }
+    75% { transform: rotateY(270deg) scale(1.1); opacity: 0.7; }
+    100% { transform: rotateY(360deg) scale(1); opacity: 1; }
+}
+
+.dice-face {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #1e293b, #334155);
+    border: 3px solid #64748b;
+    border-radius: 12px;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #f1f5f9;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.dice-face::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+}
+
+.coin-face {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #f1f5f9;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    position: relative;
+    border: 4px solid #fbbf24;
+}
+
+.coin-heads {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.coin-tails {
+    background: linear-gradient(135deg, #eab308, #ca8a04);
+}
+
+.dice-container {
+    perspective: 1000px;
+}
 </style>
 <style>
 /* Light mode overrides */
@@ -87,54 +164,72 @@ body.light-mode {
     </a>
     <div class="container mx-auto px-4 py-8 pb-32">
         <div class="relative mb-4">
-            <div class="absolute right-0 top-0 flex items-center gap-2">
+            <div class="absolute right-0 top-0 flex items-center gap-2 z-10">
                 <button onclick="toggleLightMode()" class="px-3 py-2 rounded-full bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 text-sm md:text-base" aria-label="Toggle light mode">🌓</button>
                 <button onclick="openInfoModal()" class="px-3 py-2 rounded-full bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 text-sm md:text-base" aria-label="Info and Help">ℹ️</button>
             </div>
-            <div class="text-center">
+            <div class="text-center pr-20">
                 <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Bloopr</h1>
-                <div id="active-session-label" class="mt-1 text-slate-300 text-sm">Session: Default</div>
+                <div id="active-session-label" class="mt-1 text-slate-300 text-sm break-words px-2">Game Session: Default</div>
             </div>
         </div>
 
-        <!-- Favorites Section -->
-        <div id="favorites-section" class="flex justify-between items-center mb-4 flex-wrap gap-2">
-    <h2 class="text-xl font-semibold flex items-center gap-2">
-        <svg class="w-5 h-5 fill-yellow-400 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-        Favorites
-    </h2>
-        <div class="w-full flex flex-wrap gap-2 p-2 bg-slate-800/40 border border-slate-700 rounded-xl">
-        <div class="w-full flex items-center gap-2 mb-1">
-            <button onclick="openSessionsModal()" class="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-sm">Sessions</button>
-            <button onclick="exportFavorites()" class="px-3 py-2 rounded bg-indigo-600 hover:bg-indigo-700 text-sm">Export</button>
-            <button onclick="openImportModal()" class="px-3 py-2 rounded bg-purple-600 hover:bg-purple-700 text-sm">Import</button>
+        <!-- Search Section -->
+        <div class="mb-4">
+            <input id="quick-search-input" type="text" placeholder="Quick search..." oninput="performQuickSearch(this.value)" onblur="clearQuickSearchIfEmpty()" class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base" />
         </div>
-        <button onclick="expandAll()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm md:text-base transition-all shadow-sm active:scale-[0.98] bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500">
-            <span class="text-base">⬇️</span>
-            <span>Expand</span>
-        </button>
-        <button onclick="collapseAll()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm md:text-base transition-all shadow-sm active:scale-[0.98] bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500">
-            <span class="text-base">⬆️</span>
-            <span>Collapse</span>
-        </button>
-        <button onclick="clearAllFavorites()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm md:text-base transition-all shadow-sm active:scale-[0.98] bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500">
-            <svg class="w-4 h-4 md:w-5 md:h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            <span>Clear</span>
-        </button>
-        <button onclick="openPresetModal()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm md:text-base transition-all shadow-sm active:scale-[0.98] bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500">
-            <span class="text-base">🎛️</span>
-            <span>Presets</span>
-        </button>
-            <button onclick="openSearchModal()" class="flex-1 min-w-[44%] flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm md:text-base transition-all shadow-sm active:scale-[0.98] bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500">
-                <span class="text-base">🔎</span>
-                <span>Search</span>
+
+        <!-- Quick Actions: Dice, Coin, Scenes -->
+        <div class="mb-4 flex gap-2">
+            <button onclick="rollRandomDice()" class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm md:text-base transition-all shadow-sm active:scale-[0.98] bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500">
+                <span class="text-xl">🎲</span>
+                <span class="font-medium">Dice</span>
+            </button>
+            <button onclick="flipCoinInline()" class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm md:text-base transition-all shadow-sm active:scale-[0.98] bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500">
+                <span class="text-xl">🪙</span>
+                <span class="font-medium">Coin</span>
+            </button>
+            <button onclick="openGroupsModal()" class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm md:text-base transition-all shadow-sm active:scale-[0.98] bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500">
+                <span class="text-xl">🎵</span>
+                <span class="font-medium">Scenes</span>
+            </button>
+        </div>
+
+        <!-- Favorites Section -->
+        <div id="favorites-section" class="mb-4">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <svg class="w-5 h-5 fill-yellow-400 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    Favorites
+                </h2>
+                <button onclick="clearAllFavorites()" class="px-3 py-2 rounded bg-rose-600 hover:bg-rose-700 text-sm flex items-center gap-1">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <span>Clear</span>
                 </button>
             </div>
+            <div class="flex flex-wrap gap-2 p-2 bg-slate-800/40 border border-slate-700 rounded-xl mb-3">
+                <button onclick="openSessionsModal()" class="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-sm">Game Sessions</button>
+                <button onclick="exportFavorites()" class="px-3 py-2 rounded bg-indigo-600 hover:bg-indigo-700 text-sm">Export</button>
+                <button onclick="openImportModal()" class="px-3 py-2 rounded bg-purple-600 hover:bg-purple-700 text-sm">Import</button>
+                <button onclick="openPresetModal()" class="px-3 py-2 rounded bg-emerald-600 hover:bg-emerald-700 text-sm flex items-center gap-1">
+                    <span>🎛️</span>
+                    <span>Presets</span>
+                </button>
             </div>
             <div id="favorites-grid" class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-2"></div>
         </div>
 
 <!-- Expandable Categories -->
+<div class="mb-4 flex gap-2">
+    <button onclick="expandAll()" class="flex-1 px-4 py-4 bg-slate-800/30 backdrop-blur rounded-lg border border-slate-700 hover:bg-slate-700/50 transition-colors flex items-center justify-center gap-3">
+        <span class="text-2xl">⬇️</span>
+        <span class="font-semibold text-lg">Expand All</span>
+    </button>
+    <button onclick="collapseAll()" class="flex-1 px-4 py-4 bg-slate-800/30 backdrop-blur rounded-lg border border-slate-700 hover:bg-slate-700/50 transition-colors flex items-center justify-center gap-3">
+        <span class="text-2xl">⬆️</span>
+        <span class="font-semibold text-lg">Collapse All</span>
+    </button>
+</div>
 <div id="categories-container"></div>
 
         <!-- Sound Grid removed: categories now handle listing -->
@@ -181,7 +276,7 @@ body.light-mode {
     <!-- Search Modal -->
     <div id="search-modal" class="hidden fixed inset-0 z-50">
         <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeSearchModal()"></div>
-        <div class="relative mx-auto mt-16 w-11/12 max-w-3xl bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
+        <div class="relative mx-auto mt-16 w-11/12 max-w-5xl bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
             <div class="flex items-center justify-between p-4 border-b border-slate-700">
                 <h3 class="text-lg font-semibold">Search Sounds</h3>
                 <button onclick="closeSearchModal()" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded">Close</button>
@@ -198,11 +293,11 @@ body.light-mode {
         <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeSessionsModal()"></div>
         <div class="relative mx-auto mt-16 w-11/12 max-w-3xl bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
             <div class="flex items-center justify-between p-4 border-b border-slate-700">
-                <h3 class="text-lg font-semibold">Manage Sessions</h3>
+                <h3 class="text-lg font-semibold">Manage Game Sessions</h3>
                 <button onclick="closeSessionsModal()" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded">Close</button>
             </div>
             <div class="p-4 flex items-center gap-2">
-                <input id="session-name-input" type="text" placeholder="New session name" class="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                <input id="session-name-input" type="text" placeholder="New game session name" class="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded focus:outline-none focus:ring-2 focus:ring-purple-500" />
                 <button onclick="createSessionFromModal()" class="px-3 py-2 rounded bg-emerald-600 hover:bg-emerald-700 text-sm">Create</button>
             </div>
             <div id="session-create-error" class="px-4 text-rose-400 text-sm hidden"></div>
@@ -211,7 +306,7 @@ body.light-mode {
     </div>
 
     <!-- Confirm Modal -->
-    <div id="confirm-modal" class="hidden fixed inset-0 z-50">
+    <div id="confirm-modal" class="hidden fixed inset-0 z-[60]">
         <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeConfirmModal()"></div>
         <div class="relative mx-auto mt-24 w-11/12 max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
             <div class="p-4 border-b border-slate-700">
@@ -230,15 +325,33 @@ body.light-mode {
         <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeRenameModal()"></div>
         <div class="relative mx-auto mt-24 w-11/12 max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
             <div class="p-4 border-b border-slate-700">
-                <h3 class="text-lg font-semibold">Rename Session</h3>
+                <h3 class="text-lg font-semibold">Rename Game Session</h3>
             </div>
             <div class="p-4">
-                <input id="rename-input" type="text" placeholder="Session name" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                <input id="rename-input" type="text" placeholder="Game session name" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded focus:outline-none focus:ring-2 focus:ring-purple-500" />
                 <div id="rename-error" class="mt-2 text-rose-400 text-sm hidden"></div>
             </div>
             <div class="p-4 flex justify-end gap-2 border-t border-slate-700">
                 <button onclick="closeRenameModal()" class="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-sm">Cancel</button>
                 <button onclick="saveRenameSession()" class="px-3 py-2 rounded bg-emerald-600 hover:bg-emerald-700 text-sm">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Group Modal -->
+    <div id="rename-group-modal" class="hidden fixed inset-0 z-[60]">
+        <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeRenameGroupModal()"></div>
+        <div class="relative mx-auto mt-24 w-11/12 max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
+            <div class="p-4 border-b border-slate-700">
+                <h3 class="text-lg font-semibold">Rename Scene</h3>
+            </div>
+            <div class="p-4">
+                <input id="rename-group-input" type="text" placeholder="Scene name" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                <div id="rename-group-error" class="mt-2 text-rose-400 text-sm hidden"></div>
+            </div>
+            <div class="p-4 flex justify-end gap-2 border-t border-slate-700">
+                <button onclick="closeRenameGroupModal()" class="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-sm">Cancel</button>
+                <button onclick="saveRenameGroup()" class="px-3 py-2 rounded bg-emerald-600 hover:bg-emerald-700 text-sm">Save</button>
             </div>
         </div>
     </div>
@@ -262,9 +375,9 @@ body.light-mode {
                     </ul>
                 </div>
                 <div>
-                    <h4 class="font-semibold mb-1">Favorites, Sessions, Presets</h4>
+                    <h4 class="font-semibold mb-1">Favorites, Game Sessions, Presets</h4>
                     <ul class="list-disc pl-5 text-slate-300">
-                        <li>Favorites are saved per Session. Use Sessions to create/switch/rename.</li>
+                        <li>Favorites are saved per Game Session. Use Game Sessions to create/switch/rename.</li>
                         <li>Presets quickly load curated sets.</li>
                     </ul>
                 </div>
@@ -305,17 +418,111 @@ body.light-mode {
         <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeIOModal()"></div>
         <div class="relative mx-auto mt-16 w-11/12 max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
             <div class="flex items-center justify-between p-4 border-b border-slate-700">
-                <h3 class="text-lg font-semibold" id="io-title">Import session</h3>
+                <h3 class="text-lg font-semibold" id="io-title">Import game session</h3>
                 <button onclick="closeIOModal()" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded">Close</button>
             </div>
             <div class="p-4 space-y-4">
                 <div>
-                    <h4 class="font-semibold mb-2">Import session</h4>
+                    <h4 class="font-semibold mb-2">Import game session</h4>
                     <input id="import-file" type="file" accept="application/json" class="block w-full text-sm text-slate-300" />
                     <div id="import-error" class="mt-2 text-rose-400 text-sm hidden"></div>
                     <div class="mt-3 flex justify-end">
                         <button onclick="importFavoritesFromInput()" class="px-3 py-2 rounded bg-purple-600 hover:bg-purple-700 text-sm">Import</button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sound Groups Modal -->
+    <div id="groups-modal" class="hidden fixed inset-0 z-50">
+        <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeGroupsModal()"></div>
+        <div class="relative mx-auto mt-16 w-11/12 max-w-4xl bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-slate-700 flex-shrink-0">
+                <h3 class="text-lg font-semibold">Scenes</h3>
+                <div class="flex gap-2">
+                    <button onclick="openCreateGroupModal()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 rounded text-sm">Create Scene</button>
+                    <button onclick="closeGroupsModal()" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded">Close</button>
+                </div>
+            </div>
+            <div id="groups-list" class="p-4 overflow-y-auto flex-1 scroll-area"></div>
+        </div>
+    </div>
+
+    <!-- Create Group Modal -->
+    <div id="create-group-modal" class="hidden fixed inset-0 z-50">
+        <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeCreateGroupModal()"></div>
+        <div class="relative mx-auto mt-16 w-11/12 max-w-3xl bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-slate-700 flex-shrink-0">
+                <h3 class="text-lg font-semibold">Create Scene</h3>
+                <button onclick="closeCreateGroupModal()" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded">Close</button>
+            </div>
+            <div class="p-4 space-y-4 flex-1 overflow-y-auto scroll-area">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Scene Name</label>
+                    <input id="group-name-input" type="text" placeholder="e.g., Tavern Atmosphere" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                    <div id="group-name-error" class="mt-2 text-rose-400 text-sm hidden"></div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Select Sounds</label>
+                    <div id="group-sounds-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-96 overflow-y-auto scroll-area border border-slate-700 rounded p-3"></div>
+                </div>
+                <div id="group-volumes-section" class="hidden">
+                    <label class="block text-sm font-medium mb-2">Set Default Volumes</label>
+                    <div id="group-volumes-list" class="space-y-2 max-h-64 overflow-y-auto scroll-area border border-slate-700 rounded p-3"></div>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button onclick="closeCreateGroupModal()" class="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-sm">Cancel</button>
+                    <button onclick="saveSoundGroup()" class="px-3 py-2 rounded bg-emerald-600 hover:bg-emerald-700 text-sm">Save Scene</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dice Modal -->
+    <div id="dice-modal" class="hidden fixed inset-0 z-50">
+        <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeDiceModal()"></div>
+        <div class="relative mx-auto mt-16 w-11/12 max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
+            <div class="flex items-center justify-between p-4 border-b border-slate-700">
+                <h3 class="text-lg font-semibold">Dice Roll</h3>
+                <button onclick="closeDiceModal()" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded">Close</button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="rollDice(4)" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 transition-colors">
+                        <div class="text-2xl mb-1">🎲</div>
+                        <div class="text-sm font-medium">d4</div>
+                    </button>
+                    <button onclick="rollDice(6)" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 transition-colors">
+                        <div class="text-2xl mb-1">🎲</div>
+                        <div class="text-sm font-medium">d6</div>
+                    </button>
+                    <button onclick="rollDice(8)" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 transition-colors">
+                        <div class="text-2xl mb-1">🎲</div>
+                        <div class="text-sm font-medium">d8</div>
+                    </button>
+                    <button onclick="rollDice(10)" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 transition-colors">
+                        <div class="text-2xl mb-1">🎲</div>
+                        <div class="text-sm font-medium">d10</div>
+                    </button>
+                    <button onclick="rollDice(12)" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 transition-colors">
+                        <div class="text-2xl mb-1">🎲</div>
+                        <div class="text-sm font-medium">d12</div>
+                    </button>
+                    <button onclick="rollDice(20)" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 transition-colors">
+                        <div class="text-2xl mb-1">🎲</div>
+                        <div class="text-sm font-medium">d20</div>
+                    </button>
+                    <button onclick="rollDice(100)" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 transition-colors col-span-3">
+                        <div class="text-2xl mb-1">🎲</div>
+                        <div class="text-sm font-medium">d100</div>
+                    </button>
+                </div>
+                <div id="dice-result" class="text-center py-4 min-h-[120px] flex flex-col items-center justify-center gap-2 dice-container"></div>
+                <div id="coin-flip-again" class="hidden text-center pb-2">
+                    <button onclick="flipCoin()" class="px-6 py-2 bg-amber-600 hover:bg-amber-700 rounded-lg border border-amber-500 transition-colors text-white font-medium">
+                        🪙 Flip Again
+                    </button>
                 </div>
             </div>
         </div>
@@ -794,8 +1001,10 @@ function closeSearchModal() {
     modal.classList.add('hidden');
     const input = document.getElementById('search-input');
     const results = document.getElementById('search-results');
+    const quickSearch = document.getElementById('quick-search-input');
     if (input) input.value = '';
     if (results) results.innerHTML = '';
+    if (quickSearch) quickSearch.value = '';
 }
 
 function performSearch(query) {
@@ -840,7 +1049,173 @@ function goToSound(soundId, category) {
             setTimeout(() => el.classList.remove('highlight-pulse-5'), 5200);
         }
     }, 50);
+    // Clear quick search input
+    const quickSearch = document.getElementById('quick-search-input');
+    if (quickSearch) quickSearch.value = '';
     closeSearchModal();
+}
+
+function performQuickSearch(query) {
+    if (!query || !query.trim()) return;
+    // Open the full search modal with the query pre-filled
+    const modal = document.getElementById('search-modal');
+    const input = document.getElementById('search-input');
+    if (input) input.value = query;
+    modal.classList.remove('hidden');
+    performSearch(query);
+    setTimeout(() => input && input.focus(), 0);
+}
+
+function clearQuickSearchIfEmpty() {
+    const quickSearch = document.getElementById('quick-search-input');
+    const searchModal = document.getElementById('search-modal');
+    // Only clear if search modal is closed (user clicked away, not searching)
+    if (quickSearch && searchModal && searchModal.classList.contains('hidden')) {
+        quickSearch.value = '';
+    }
+}
+
+function openDiceModal() {
+    document.getElementById('dice-modal').classList.remove('hidden');
+    const resultEl = document.getElementById('dice-result');
+    if (resultEl) resultEl.textContent = '';
+    // Hide "Flip Again" button initially (will be shown after coin flip)
+    const flipAgainBtn = document.getElementById('coin-flip-again');
+    if (flipAgainBtn) flipAgainBtn.classList.add('hidden');
+}
+
+function closeDiceModal() {
+    const modal = document.getElementById('dice-modal');
+    modal.classList.add('hidden');
+    const resultEl = document.getElementById('dice-result');
+    if (resultEl) resultEl.textContent = '';
+    // Hide "Flip Again" button
+    const flipAgainBtn = document.getElementById('coin-flip-again');
+    if (flipAgainBtn) flipAgainBtn.classList.add('hidden');
+    // Reset modal to show dice buttons by default
+    const title = modal.querySelector('h3');
+    const diceButtons = modal.querySelector('.grid');
+    if (title) title.textContent = 'Dice Roll';
+    if (diceButtons) diceButtons.style.display = 'grid';
+}
+
+function rollDice(sides) {
+    const result = Math.floor(Math.random() * sides) + 1;
+    const resultEl = document.getElementById('dice-result');
+    if (!resultEl) return;
+    
+    // Hide "Flip Again" button when rolling dice
+    const flipAgainBtn = document.getElementById('coin-flip-again');
+    if (flipAgainBtn) flipAgainBtn.classList.add('hidden');
+    
+    // Clear previous content
+    resultEl.innerHTML = '';
+    
+    // Create animated dice element
+    const diceDiv = document.createElement('div');
+    diceDiv.className = 'dice-face dice-rolling';
+    diceDiv.textContent = '?';
+    resultEl.appendChild(diceDiv);
+    
+    // Animate rolling by showing random numbers during the animation
+    let rollCount = 0;
+    const rollInterval = setInterval(() => {
+        rollCount++;
+        const temp = Math.floor(Math.random() * sides) + 1;
+        diceDiv.textContent = temp.toString();
+        
+        if (rollCount >= 15) {
+            clearInterval(rollInterval);
+        }
+    }, 60);
+    
+    // After animation, show the final result
+    setTimeout(() => {
+        clearInterval(rollInterval);
+        diceDiv.classList.remove('dice-rolling');
+        diceDiv.textContent = result.toString();
+        // Add label below
+        const label = document.createElement('div');
+        label.className = 'text-sm text-slate-300 mt-2';
+        label.textContent = `d${sides}: ${result}`;
+        resultEl.appendChild(label);
+    }, 1000);
+}
+
+function flipCoin() {
+    const result = Math.random() < 0.5 ? 'Heads' : 'Tails';
+    const resultEl = document.getElementById('dice-result');
+    if (!resultEl) return;
+    
+    // Clear previous content
+    resultEl.innerHTML = '';
+    
+    // Create animated coin element
+    const coinDiv = document.createElement('div');
+    coinDiv.className = 'coin-face coin-flipping';
+    coinDiv.innerHTML = '<div class="text-2xl">🪙</div>';
+    resultEl.appendChild(coinDiv);
+    
+    // Animate flipping by showing alternating visuals during the animation
+    let flipCount = 0;
+    const flipInterval = setInterval(() => {
+        flipCount++;
+        // Alternate between edge view and faces during flip
+        if (flipCount % 2 === 0) {
+            coinDiv.innerHTML = '<div class="text-2xl">🪙</div>';
+        } else {
+            const temp = Math.random() < 0.5 ? 'H' : 'T';
+            coinDiv.innerHTML = `<div class="text-2xl">${temp}</div>`;
+        }
+        
+        if (flipCount >= 8) {
+            clearInterval(flipInterval);
+        }
+    }, 90);
+    
+    // After animation, show the final result
+    setTimeout(() => {
+        clearInterval(flipInterval);
+        coinDiv.classList.remove('coin-flipping');
+        coinDiv.className = `coin-face coin-${result.toLowerCase()}`;
+        coinDiv.innerHTML = result === 'Heads' ? '<div class="text-3xl">H</div>' : '<div class="text-3xl">T</div>';
+        // Add label below
+        const label = document.createElement('div');
+        label.className = 'text-lg font-bold text-slate-200 mt-2';
+        label.textContent = result;
+        resultEl.appendChild(label);
+        // Show "Flip Again" button
+        const flipAgainBtn = document.getElementById('coin-flip-again');
+        if (flipAgainBtn) flipAgainBtn.classList.remove('hidden');
+    }, 800);
+}
+
+function rollRandomDice() {
+    // Open the dice modal to choose dice type
+    const modal = document.getElementById('dice-modal');
+    const title = modal.querySelector('h3');
+    const diceButtons = modal.querySelector('.grid');
+    const flipAgainBtn = document.getElementById('coin-flip-again');
+    if (title) title.textContent = 'Dice Roll';
+    if (diceButtons) diceButtons.style.display = 'grid';
+    if (flipAgainBtn) flipAgainBtn.classList.add('hidden');
+    openDiceModal();
+}
+
+function flipCoinInline() {
+    // Open dice modal but show only coin flip
+    const modal = document.getElementById('dice-modal');
+    const title = modal.querySelector('h3');
+    const diceButtons = modal.querySelector('.grid');
+    const flipAgainBtn = document.getElementById('coin-flip-again');
+    if (title) title.textContent = 'Coin Flip';
+    if (diceButtons) diceButtons.style.display = 'none';
+    if (flipAgainBtn) flipAgainBtn.classList.add('hidden');
+    openDiceModal();
+    // Small delay to ensure modal is open, then flip coin
+    setTimeout(() => {
+        flipCoin();
+    }, 100);
 }
 
 function applyPreset(presetName) {
@@ -936,12 +1311,12 @@ function renderSessionsModal() {
             </div>
         </div>
     `).join('');
-    container.innerHTML = rows || '<div class="text-slate-400">No sessions</div>';
+    container.innerHTML = rows || '<div class="text-slate-400">No game sessions</div>';
 }
 
-let confirmState = { type: null, sessionId: null };
-function openConfirm(title, message, type, sessionId) {
-    confirmState = { type, sessionId };
+let confirmState = { type: null, sessionId: null, groupIndex: null };
+function openConfirm(title, message, type, sessionId, groupIndex) {
+    confirmState = { type, sessionId, groupIndex };
     const t = document.getElementById('confirm-title');
     const m = document.getElementById('confirm-message');
     if (t) t.textContent = String(title || 'Confirm');
@@ -950,21 +1325,28 @@ function openConfirm(title, message, type, sessionId) {
 }
 function closeConfirmModal() {
     document.getElementById('confirm-modal').classList.add('hidden');
-    confirmState = { type: null, sessionId: null };
+    confirmState = { type: null, sessionId: null, groupIndex: null };
 }
 function openConfirmClear(id) {
     const s = sessions.find(x => x.id===id);
-    openConfirm('Clear Session', `Clear all favorites in "${s ? s.name : ''}"?`, 'clear', id);
+    openConfirm('Clear Game Session', `Clear all favorites in "${s ? s.name : ''}"?`, 'clear', id, null);
 }
 function openConfirmDelete(id) {
     const s = sessions.find(x => x.id===id);
-    openConfirm('Delete Session', `Delete session "${s ? s.name : ''}"? This cannot be undone.`, 'delete', id);
+    openConfirm('Delete Game Session', `Delete game session "${s ? s.name : ''}"? This cannot be undone.`, 'delete', id, null);
 }
 function confirmModalProceed() {
     if (confirmState.type === 'clear') {
         clearSession(confirmState.sessionId);
     } else if (confirmState.type === 'delete') {
         deleteSession(confirmState.sessionId);
+    } else if (confirmState.type === 'deleteGroup') {
+        const group = soundGroups[confirmState.groupIndex];
+        if (group) {
+            soundGroups.splice(confirmState.groupIndex, 1);
+            saveSoundGroups();
+            renderGroupsModal();
+        }
     }
     closeConfirmModal();
 }
@@ -994,14 +1376,282 @@ function closeNotice() {
     document.getElementById('notice-modal').classList.add('hidden');
 }
 
+// Sound Groups
+let soundGroups = JSON.parse(localStorage.getItem('soundboard-groups') || '[]');
+
+function loadSoundGroups() {
+    soundGroups = JSON.parse(localStorage.getItem('soundboard-groups') || '[]');
+}
+
+function saveSoundGroups() {
+    localStorage.setItem('soundboard-groups', JSON.stringify(soundGroups));
+}
+
+function openGroupsModal() {
+    renderGroupsModal();
+    document.getElementById('groups-modal').classList.remove('hidden');
+}
+
+function closeGroupsModal() {
+    document.getElementById('groups-modal').classList.add('hidden');
+}
+
+function renderGroupsModal() {
+    const container = document.getElementById('groups-list');
+    if (!container) return;
+    if (soundGroups.length === 0) {
+        container.innerHTML = '<div class="text-slate-400 text-center py-8">No scenes yet. Click "Create Scene" to get started.</div>';
+        return;
+    }
+    const html = soundGroups.map((group, idx) => {
+        const soundCount = group.soundIds.length;
+        return `
+            <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4 mb-3 cursor-pointer hover:border-emerald-500/70 transition-colors" onclick="playSoundGroup(${idx})">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="font-semibold flex-1">${sanitizeText(group.name)}</h4>
+                    <div class="flex gap-2" onclick="event.stopPropagation()">
+                        <button onclick="openEditGroupModal(${idx})" class="px-3 py-1 text-xs rounded bg-slate-700 hover:bg-slate-600">Edit</button>
+                        <button onclick="openRenameGroupModal(${idx})" class="px-3 py-1 text-xs rounded bg-slate-700 hover:bg-slate-600">Rename</button>
+                        <button onclick="openConfirmDeleteGroup(${idx})" class="px-3 py-1 text-xs rounded bg-red-600 hover:bg-red-700">Delete</button>
+                    </div>
+                </div>
+                <div class="text-sm text-slate-400">${soundCount} sound${soundCount !== 1 ? 's' : ''} • Tap to play</div>
+            </div>
+        `;
+    }).join('');
+    container.innerHTML = html;
+}
+
+let createGroupEditingIndex = null;
+function openCreateGroupModal(groupIndex = null) {
+    createGroupEditingIndex = groupIndex;
+    const container = document.getElementById('group-sounds-list');
+    if (!container) return;
+    // Render all sounds as checkboxes
+    const allSounds = [];
+    for (const [category, sounds] of Object.entries(soundLibrary)) {
+        sounds.forEach(sound => {
+            allSounds.push({ ...sound, category });
+        });
+    }
+    let preSelectedIds = [];
+    let existingVolumes = {};
+    let existingName = '';
+    if (groupIndex !== null && soundGroups[groupIndex]) {
+        const group = soundGroups[groupIndex];
+        existingName = group.name;
+        preSelectedIds = group.soundIds || [];
+        existingVolumes = group.volumes || {};
+    }
+    const html = allSounds.map(sound => {
+        const isChecked = preSelectedIds.includes(sound.id);
+        return `
+        <label class="flex items-center gap-2 p-2 bg-slate-800/50 rounded border border-slate-700 cursor-pointer hover:bg-slate-700/50">
+            <input type="checkbox" value="${sound.id}" class="group-sound-checkbox rounded" ${isChecked ? 'checked' : ''} onchange="updateGroupVolumesSection()" />
+            <span class="text-xl">${sound.icon}</span>
+            <span class="text-sm flex-1">${sound.name}</span>
+        </label>
+    `;
+    }).join('');
+    container.innerHTML = html;
+    const nameInput = document.getElementById('group-name-input');
+    const err = document.getElementById('group-name-error');
+    if (nameInput) nameInput.value = existingName;
+    if (err) { err.classList.add('hidden'); err.textContent = ''; }
+    updateGroupVolumesSection();
+    document.getElementById('create-group-modal').classList.remove('hidden');
+    document.querySelector('#create-group-modal h3').textContent = groupIndex !== null ? 'Edit Scene' : 'Create Scene';
+}
+
+function closeCreateGroupModal() {
+    document.getElementById('create-group-modal').classList.add('hidden');
+    createGroupEditingIndex = null;
+}
+
+function updateGroupVolumesSection() {
+    const checkboxes = document.querySelectorAll('.group-sound-checkbox:checked');
+    const volumesSection = document.getElementById('group-volumes-section');
+    const volumesList = document.getElementById('group-volumes-list');
+    if (!volumesSection || !volumesList) return;
+    
+    if (checkboxes.length === 0) {
+        volumesSection.classList.add('hidden');
+        return;
+    }
+    
+    volumesSection.classList.remove('hidden');
+    const allSounds = [];
+    for (const [category, sounds] of Object.entries(soundLibrary)) {
+        sounds.forEach(sound => {
+            allSounds.push({ ...sound, category });
+        });
+    }
+    
+    const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+    const selectedSounds = allSounds.filter(s => selectedIds.includes(s.id));
+    
+    let existingVolumes = {};
+    if (createGroupEditingIndex !== null && soundGroups[createGroupEditingIndex]) {
+        existingVolumes = soundGroups[createGroupEditingIndex].volumes || {};
+    }
+    
+    const volumesHtml = selectedSounds.map(sound => {
+        const defaultVol = existingVolumes[sound.id] !== undefined ? existingVolumes[sound.id] : getVolumeMemory(sound.id);
+        return `
+            <div class="flex items-center gap-2 p-2 bg-slate-800/50 rounded border border-slate-700">
+                <span class="text-xl w-8">${sound.icon}</span>
+                <span class="text-sm flex-1">${sound.name}</span>
+                <input type="range" min="0" max="1" step="0.01" value="${defaultVol}" 
+                    oninput="this.nextElementSibling.textContent = Math.round(this.value * 100) + '%'"
+                    data-sound-id="${sound.id}"
+                    class="w-24 h-1 rounded-lg appearance-none cursor-pointer group-volume-slider"
+                    style="background: linear-gradient(to right, rgb(168, 85, 247) 0%, rgb(168, 85, 247) ${defaultVol * 100}%, rgb(51, 65, 85) ${defaultVol * 100}%, rgb(51, 65, 85) 100%)" />
+                <span class="text-xs text-slate-400 w-10 text-right">${Math.round(defaultVol * 100)}%</span>
+            </div>
+        `;
+    }).join('');
+    volumesList.innerHTML = volumesHtml;
+}
+
+function saveSoundGroup() {
+    const nameInput = document.getElementById('group-name-input');
+    const err = document.getElementById('group-name-error');
+    if (err) { err.classList.add('hidden'); err.textContent = ''; }
+    const name = sanitizeText((nameInput?.value || '').trim()).slice(0, 64);
+    if (!name) {
+        if (err) { err.textContent = 'Please enter a scene name.'; err.classList.remove('hidden'); }
+        return;
+    }
+    // Get selected sounds
+    const checkboxes = document.querySelectorAll('.group-sound-checkbox:checked');
+    const soundIds = Array.from(checkboxes).map(cb => cb.value);
+    if (soundIds.length === 0) {
+        if (err) { err.textContent = 'Please select at least one sound.'; err.classList.remove('hidden'); }
+        return;
+    }
+    // Get volumes
+    const volumeSliders = document.querySelectorAll('.group-volume-slider');
+    const volumes = {};
+    volumeSliders.forEach(slider => {
+        const soundId = slider.getAttribute('data-sound-id');
+        const vol = parseFloat(slider.value);
+        volumes[soundId] = vol;
+    });
+    
+    if (createGroupEditingIndex !== null) {
+        // Update existing group
+        const group = soundGroups[createGroupEditingIndex];
+        if (group) {
+            // Check for duplicate names (excluding current group)
+            if (soundGroups.some((g, idx) => idx !== createGroupEditingIndex && g.name.toLowerCase() === name.toLowerCase())) {
+                if (err) { err.textContent = 'Scene name must be unique.'; err.classList.remove('hidden'); }
+                return;
+            }
+            group.name = name;
+            group.soundIds = soundIds;
+            group.volumes = volumes;
+        }
+    } else {
+        // Check for duplicate names
+        if (soundGroups.some(g => g.name.toLowerCase() === name.toLowerCase())) {
+            if (err) { err.textContent = 'Scene name must be unique.'; err.classList.remove('hidden'); }
+            return;
+        }
+        // Create new group
+        soundGroups.push({ id: 'g_' + Date.now(), name, soundIds, volumes });
+    }
+    saveSoundGroups();
+    closeCreateGroupModal();
+    renderGroupsModal();
+    render();
+}
+
+function openEditGroupModal(groupIndex) {
+    openCreateGroupModal(groupIndex);
+}
+
+function playSoundGroup(groupIndex) {
+    const group = soundGroups[groupIndex];
+    if (!group) return;
+    const volumes = group.volumes || {};
+    // Play all sounds in the group with their default volumes
+    group.soundIds.forEach(soundId => {
+        const found = findSoundById(soundId);
+        if (found) {
+            const { sound, category } = found;
+            const defaultVol = volumes[soundId] !== undefined ? volumes[soundId] : getVolumeMemory(sound.id);
+            // Set volume memory first so playSound uses it
+            const volumeMem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}');
+            volumeMem[sound.id] = defaultVol;
+            localStorage.setItem('soundboard-volumeMemory', JSON.stringify(volumeMem));
+            playSound(sound.id, sound.name, sound.url, category, sound.icon);
+            // Ensure volume is set after playing
+            setTimeout(() => {
+                const audio = audioElements[sound.id];
+                if (audio) {
+                    audio.volume = defaultVol;
+                    if (activeSounds[sound.id]) {
+                        activeSounds[sound.id].volume = defaultVol;
+                    }
+                }
+            }, 100);
+        }
+    });
+    closeGroupsModal();
+    render();
+}
+
+function openConfirmDeleteGroup(groupIndex) {
+    const group = soundGroups[groupIndex];
+    openConfirm('Delete Scene', `Delete scene "${group ? group.name : ''}"?`, 'deleteGroup', null, groupIndex);
+}
+
+let renameGroupTargetIndex = null;
+function openRenameGroupModal(groupIndex) {
+    renameGroupTargetIndex = groupIndex;
+    const group = soundGroups[groupIndex];
+    const input = document.getElementById('rename-group-input');
+    const err = document.getElementById('rename-group-error');
+    if (err) { err.textContent = ''; err.classList.add('hidden'); }
+    if (input) input.value = group ? group.name : '';
+    document.getElementById('rename-group-modal').classList.remove('hidden');
+}
+
+function closeRenameGroupModal() {
+    document.getElementById('rename-group-modal').classList.add('hidden');
+    renameGroupTargetIndex = null;
+}
+
+function saveRenameGroup() {
+    const group = soundGroups[renameGroupTargetIndex];
+    if (!group) { closeRenameGroupModal(); return; }
+    const input = document.getElementById('rename-group-input');
+    const err = document.getElementById('rename-group-error');
+    const sanitized = sanitizeText((input?.value || '').trim()).slice(0, 64);
+    if (err) { err.textContent = ''; err.classList.add('hidden'); }
+    if (!sanitized) {
+        if (err) { err.textContent = 'Please enter a scene name.'; err.classList.remove('hidden'); }
+        return;
+    }
+    // Check for duplicate names
+    if (soundGroups.some((g, idx) => idx !== renameGroupTargetIndex && g.name.toLowerCase() === sanitized.toLowerCase())) {
+        if (err) { err.textContent = 'Scene name must be unique. Please choose another.'; err.classList.remove('hidden'); }
+        return;
+    }
+    group.name = sanitized;
+    saveSoundGroups();
+    renderGroupsModal();
+    closeRenameGroupModal();
+}
+
 function createSessionFromModal() {
     const input = document.getElementById('session-name-input');
     const sanitized = sanitizeText((input?.value||'').trim()).slice(0,64);
     const err = document.getElementById('session-create-error');
     if (err) { err.classList.add('hidden'); err.textContent=''; }
-    if (!sanitized) { if (err){err.textContent='Please enter a session name.'; err.classList.remove('hidden');} return; }
+    if (!sanitized) { if (err){err.textContent='Please enter a game session name.'; err.classList.remove('hidden');} return; }
     if (sessions.some(s => s.name.toLowerCase() === sanitized.toLowerCase())) {
-        if (err){err.textContent='Session name must be unique. Please choose another.'; err.classList.remove('hidden');}
+        if (err){err.textContent='Game session name must be unique. Please choose another.'; err.classList.remove('hidden');}
         return;
     }
     const id = 's_' + Math.random().toString(36).slice(2,10);
@@ -1039,9 +1689,9 @@ function saveRenameSession() {
     const err = document.getElementById('rename-error');
     const sanitized = sanitizeText((input?.value||'').trim()).slice(0,64);
     if (err){err.textContent=''; err.classList.add('hidden');}
-    if (!sanitized) { if (err){err.textContent='Please enter a session name.'; err.classList.remove('hidden');} return; }
+    if (!sanitized) { if (err){err.textContent='Please enter a game session name.'; err.classList.remove('hidden');} return; }
     if (sessions.some(x => x.id!==s.id && x.name.toLowerCase()===sanitized.toLowerCase())) {
-        if (err){err.textContent='Session name must be unique. Please choose another.'; err.classList.remove('hidden');}
+        if (err){err.textContent='Game session name must be unique. Please choose another.'; err.classList.remove('hidden');}
         return;
     }
     s.name = sanitized;
@@ -1060,7 +1710,7 @@ function clearSession(id) {
 }
 
 function deleteSession(id) {
-    if (sessions.length<=1) { showNotice('Cannot delete the last session.'); return; }
+    if (sessions.length<=1) { showNotice('Cannot delete the last game session.'); return; }
     sessions = sessions.filter(s=>s.id!==id);
     localStorage.setItem('soundboard-sessions', JSON.stringify(sessions));
     localStorage.removeItem(`soundboard-favorites-${id}`);
@@ -1123,8 +1773,8 @@ function clearSessionConfirm() {
 }
 
 function deleteSessionConfirm() {
-    if (!confirm('Delete this session and its data?')) return;
-    if (sessions.length <= 1) { alert('Cannot delete the last session.'); return; }
+    if (!confirm('Delete this game session and its data?')) return;
+    if (sessions.length <= 1) { alert('Cannot delete the last game session.'); return; }
     localStorage.removeItem(getFavoritesKey());
     sessions = sessions.filter(s => s.id !== currentSessionId);
     localStorage.setItem('soundboard-sessions', JSON.stringify(sessions));
@@ -1138,7 +1788,32 @@ function deleteSessionConfirm() {
 function exportFavorites() {
     const names = (favorites||[]).map(f => f.name).filter(n => !!n);
     const unique = Array.from(new Set(names));
-    const data = { version: 2, names: unique };
+    
+    // Export scenes with sound names and volumes
+    const exportedScenes = (soundGroups || []).map(group => {
+        const soundNames = [];
+        const volumes = {};
+        group.soundIds.forEach(soundId => {
+            const found = findSoundById(soundId);
+            if (found) {
+                soundNames.push(found.sound.name);
+                if (group.volumes && group.volumes[soundId] !== undefined) {
+                    volumes[found.sound.name] = group.volumes[soundId];
+                }
+            }
+        });
+        return {
+            name: group.name,
+            soundNames: soundNames,
+            volumes: volumes
+        };
+    });
+    
+    const data = { 
+        version: 3, 
+        names: unique,
+        scenes: exportedScenes
+    };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1159,7 +1834,7 @@ function importFavoritesFromInput() {
     reader.onload = () => {
         try {
             const obj = JSON.parse(String(reader.result || '{}'));
-            // Support v2 (names) and v1 (favorites objects), but only use names
+            // Support v3 (names + scenes), v2 (names only), and v1 (favorites objects)
             let names = Array.isArray(obj?.names) ? obj.names : Array.isArray(obj?.favorites) ? obj.favorites.map(x => x?.name) : [];
             names = names.map(n => sanitizeText(String(n||'').slice(0,128))).filter(n => !!n);
             const seen = new Set();
@@ -1169,13 +1844,71 @@ function importFavoritesFromInput() {
             const missing = unique.filter(n => !findSoundByName(n));
             favorites = resolved.map(({ sound, category }) => ({ id: sound.id, name: sound.name, url: sound.url, category, icon: sound.icon }));
             persistFavorites();
+            
+            // Import scenes if available (v3 format)
+            let scenesImported = 0;
+            let scenesMissing = 0;
+            if (Array.isArray(obj?.scenes)) {
+                obj.scenes.forEach(sceneData => {
+                    if (!sceneData.name || !Array.isArray(sceneData.soundNames)) return;
+                    const sceneName = sanitizeText(String(sceneData.name).slice(0, 64));
+                    if (!sceneName) return;
+                    
+                    const sceneSoundIds = [];
+                    const sceneVolumes = {};
+                    sceneData.soundNames.forEach(soundName => {
+                        const found = findSoundByName(soundName);
+                        if (found) {
+                            sceneSoundIds.push(found.sound.id);
+                            // Get volume from imported data if available
+                            if (sceneData.volumes && sceneData.volumes[soundName] !== undefined) {
+                                const vol = parseFloat(sceneData.volumes[soundName]);
+                                if (!isNaN(vol) && vol >= 0 && vol <= 1) {
+                                    sceneVolumes[found.sound.id] = vol;
+                                }
+                            }
+                        } else {
+                            scenesMissing++;
+                        }
+                    });
+                    
+                    if (sceneSoundIds.length > 0) {
+                        // Check for duplicate scene name
+                        const existingIndex = soundGroups.findIndex(g => g.name.toLowerCase() === sceneName.toLowerCase());
+                        if (existingIndex >= 0) {
+                            // Update existing scene
+                            soundGroups[existingIndex].soundIds = sceneSoundIds;
+                            soundGroups[existingIndex].volumes = sceneVolumes;
+                        } else {
+                            // Create new scene
+                            soundGroups.push({
+                                id: 'g_' + Date.now() + Math.random().toString(36).slice(2, 10),
+                                name: sceneName,
+                                soundIds: sceneSoundIds,
+                                volumes: sceneVolumes
+                            });
+                        }
+                        scenesImported++;
+                    }
+                });
+                saveSoundGroups();
+            }
+            
             render();
             closeIOModal();
+            let noticeMsg = '';
             if (missing.length) {
-                showNotice(`Imported with ${missing.length} not found: ${missing.slice(0,5).join(', ')}${missing.length>5 ? '…' : ''}`);
+                noticeMsg += `Favorites imported with ${missing.length} sound${missing.length !== 1 ? 's' : ''} not found: ${missing.slice(0,5).join(', ')}${missing.length>5 ? '…' : ''}. `;
             } else {
-                showNotice('Favorites imported.');
+                noticeMsg += 'Favorites imported. ';
             }
+            if (scenesImported > 0) {
+                noticeMsg += `${scenesImported} scene${scenesImported !== 1 ? 's' : ''} imported.`;
+                if (scenesMissing > 0) {
+                    noticeMsg += ` ${scenesMissing} sound${scenesMissing !== 1 ? 's' : ''} in scenes not found.`;
+                }
+            }
+            showNotice(noticeMsg || 'Favorites imported.');
         } catch (e) {
             if (err){err.textContent='Incorrect file format. Export a sample to see the expected JSON.'; err.classList.remove('hidden');}
         }
@@ -1256,7 +1989,8 @@ audio.addEventListener('timeupdate', () => {
     } else {
         audio.play();
         if (!activeSounds[soundId]) {
-            // First time playing this sound
+            // First time playing this sound - use volume memory
+            const savedVolume = getVolumeMemory(soundId);
             activeSounds[soundId] = {
                 name: soundName,
                 url: url,
@@ -1264,12 +1998,12 @@ audio.addEventListener('timeupdate', () => {
                 icon: icon,
                 isPlaying: true,
                 loop: false,
-                volume: 0.7,
+                volume: savedVolume,
                 smartMix: false,
                 duckApplied: false,
                 originalVolume: undefined
             };
-            audio.volume = 0.7;
+            audio.volume = savedVolume;
         } else {
             // Resuming a paused sound
             activeSounds[soundId].isPlaying = true;
@@ -1282,6 +2016,7 @@ audio.addEventListener('timeupdate', () => {
 function setLoopBeforePlay(soundId, soundName, url, category, icon) {
     if (!activeSounds[soundId]) {
         // Sound hasn't been played yet, add it to activeSounds with loop enabled
+        const savedVolume = getVolumeMemory(soundId);
         activeSounds[soundId] = {
             name: soundName,
             url: url,
@@ -1289,11 +2024,11 @@ function setLoopBeforePlay(soundId, soundName, url, category, icon) {
             icon: icon,
             isPlaying: false,
             loop: true,
-            volume: 0.7
+            volume: savedVolume
         };
         // Pre-initialize audio with loop
         const audio = getAudioElement(soundId, url, true);
-        audio.volume = 0.7;
+        audio.volume = savedVolume;
     } else {
         // Sound already exists, just toggle loop
         toggleLoop(soundId);
@@ -1303,6 +2038,7 @@ function setLoopBeforePlay(soundId, soundName, url, category, icon) {
 
 function setSmartMixBeforePlay(soundId, soundName, url, category, icon) {
     if (!activeSounds[soundId]) {
+        const savedVolume = getVolumeMemory(soundId);
         activeSounds[soundId] = {
             name: soundName,
             url: url,
@@ -1310,13 +2046,13 @@ function setSmartMixBeforePlay(soundId, soundName, url, category, icon) {
             icon: icon,
             isPlaying: false,
             loop: false,
-            volume: 0.7,
+            volume: savedVolume,
             smartMix: true,
             duckApplied: false,
             originalVolume: undefined
         };
         const audio = getAudioElement(soundId, url, false);
-        audio.volume = 0.7;
+        audio.volume = savedVolume;
     } else {
         toggleSmartMix(soundId);
     }
@@ -1353,8 +2089,20 @@ function setSmartMixBeforePlay(soundId, soundName, url, category, icon) {
             if (audio) {
                 audio.volume = volume;
             }
+            if (activeSounds[soundId]) {
             activeSounds[soundId].volume = volume;
+                // Save volume memory for this sound
+                const volumeMem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}');
+                volumeMem[soundId] = volume;
+                localStorage.setItem('soundboard-volumeMemory', JSON.stringify(volumeMem));
+            }
             //render();
+        }
+        
+        // Get Volume Memory
+        function getVolumeMemory(soundId) {
+            const volumeMem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}');
+            return volumeMem[soundId] !== undefined ? volumeMem[soundId] : 0.7;
         }
 
         function toggleSmartMix(soundId) {
@@ -1555,7 +2303,7 @@ document.getElementById('categories-container').innerHTML = categoriesHtml;
             const sessLbl = document.getElementById('active-session-label');
             if (sessLbl) {
                 const sess = sessions.find(s => s.id === currentSessionId);
-                sessLbl.textContent = `Session: ${sess ? sess.name : 'Default'}`;
+                sessLbl.textContent = `Game Session: ${sess ? sess.name : 'Default'}`;
             }
             // Apply light mode
             const bodyEl = document.body;
@@ -1650,6 +2398,64 @@ if (activeSoundsCount > 0) {
     activeBar.classList.add('hidden');
 }
         }
+
+        // Keyboard Shortcuts (PC)
+        document.addEventListener('keydown', (e) => {
+            // Ignore if typing in an input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+                return;
+            }
+            
+            // Close modals with Escape
+            if (e.key === 'Escape') {
+                document.querySelectorAll('[id$="-modal"]').forEach(m => m.classList.add('hidden'));
+                return;
+            }
+            
+            // Space: Play/pause all active sounds
+            if (e.key === ' ' && e.target.tagName !== 'BUTTON') {
+                e.preventDefault();
+                const playingSounds = Object.entries(activeSounds).filter(([_, s]) => s.isPlaying);
+                if (playingSounds.length > 0) {
+                    // Pause all
+                    playingSounds.forEach(([id]) => {
+                        const s = activeSounds[id];
+                        playSound(id, s.name, s.url, s.category, s.icon);
+                    });
+                } else {
+                    // Try to play all active sounds
+                    Object.entries(activeSounds).forEach(([id, s]) => {
+                        playSound(id, s.name, s.url, s.category, s.icon);
+                    });
+                }
+                return;
+            }
+            
+            // S: Stop all sounds
+            if (e.key === 's' || e.key === 'S') {
+                e.preventDefault();
+                clearAllActiveSounds();
+                return;
+            }
+            
+            // /: Open search
+            if (e.key === '/') {
+                e.preventDefault();
+                openSearchModal();
+                return;
+            }
+            
+            // Numbers 1-9: Play favorites (first 9)
+            const num = parseInt(e.key);
+            if (num >= 1 && num <= 9) {
+                e.preventDefault();
+                if (favorites.length >= num) {
+                    const fav = favorites[num - 1];
+                    playSound(fav.id, fav.name, fav.url, fav.category, fav.icon);
+                }
+                return;
+            }
+        });
 
         // Initial Render
         render();
