@@ -371,8 +371,9 @@ body.light-mode {
                 <div>
                     <h4 class="font-semibold mb-1">Playing Sounds</h4>
                     <ul class="list-disc pl-5 text-slate-300">
-                        <li>Tap a sound card to Play/Pause. Use the Loop button to repeat automatically.</li>
-                        <li>Priority mode ducks other sounds to 30% volume while priority sound plays.</li>
+                        <li>Tap anywhere on a sound card to Play/Pause. Cards turn green when playing.</li>
+                        <li>Use the Loop button to repeat sounds automatically.</li>
+                        <li>Priority mode reduces other sounds to 30% volume while priority sound plays.</li>
                         <li>Volume is remembered for each sound when replayed.</li>
                         <li>Active Sounds bar at the bottom shows all playing sounds with controls.</li>
                     </ul>
@@ -380,10 +381,10 @@ body.light-mode {
                 <div>
                     <h4 class="font-semibold mb-1">Quick Actions</h4>
                     <ul class="list-disc pl-5 text-slate-300">
-                        <li><strong>Search:</strong> Find sounds by name, icon, or category.</li>
-                        <li><strong>Dice:</strong> Roll d4, d6, d8, d10, d12, d20, or d100.</li>
-                        <li><strong>Coin:</strong> Flip a coin with animation.</li>
-                        <li><strong>Scenes:</strong> Create groups of sounds that play together with preset volumes.</li>
+                        <li><strong>Search:</strong> Find sounds by name, icon, or category. Also available in Scenes and Presets modals.</li>
+                        <li><strong>Dice:</strong> Roll d4, d6, d8, d10, d12, d20, or d100 with animation.</li>
+                        <li><strong>Coin:</strong> Flip a coin with animation. Use "Flip Again" to flip multiple times.</li>
+                        <li><strong>Scenes:</strong> Create groups of sounds that play together with preset volumes and delays.</li>
                     </ul>
                 </div>
                 <div>
@@ -400,8 +401,13 @@ body.light-mode {
                     <ul class="list-disc pl-5 text-slate-300">
                         <li>Create Scenes to group multiple sounds that play together.</li>
                         <li>Set default volumes for each sound in a scene for perfect mixing.</li>
-                        <li>Edit scenes to adjust sounds and volumes anytime.</li>
-                        <li>Tap a scene card to play all sounds with their preset volumes.</li>
+                        <li>Add delays (0-30 seconds) to individual sounds for staggered playback.</li>
+                        <li>Enable Loop to continuously replay all sounds in a scene (delayed sounds play once).</li>
+                        <li>Load default scenes for quick setup, or create your own custom scenes.</li>
+                        <li>Search within the edit scene modal to quickly find sounds to add.</li>
+                        <li>Search scenes by name in the scenes modal to find them quickly.</li>
+                        <li>Tap a scene card to play all sounds with their preset volumes and delays.</li>
+                        <li>Edit, rename, or delete scenes anytime. Export/import scenes with your favourites.</li>
                     </ul>
                 </div>
                 <div>
@@ -409,16 +415,19 @@ body.light-mode {
                     <ul class="list-disc pl-5 text-slate-300">
                         <li>Presets quickly load curated sound sets for specific game themes.</li>
                         <li>Includes game-specific presets (Gloomhaven, Everdell, Night Cage, etc.).</li>
+                        <li>Search presets by name or description to find them quickly.</li>
                         <li>Applying a preset adds sounds to favourites and expands relevant categories.</li>
+                        <li>Tap a preset card to apply it instantly.</li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-semibold mb-1">Import/Export</h4>
                     <ul class="list-disc pl-5 text-slate-300">
-                        <li>Export downloads favourites and scenes as JSON.</li>
+                        <li>Export downloads favourites and scenes (including volumes, delays, and loop settings) as JSON.</li>
                         <li>Import restores favourites and scenes from a JSON file.</li>
-                        <li>Exported files include sound names and scene volumes.</li>
+                        <li>Exported files include sound names, scene volumes, delays, and loop states.</li>
                         <li>Unknown sound names are skipped with a notification.</li>
+                        <li>Duplicate names in imports are automatically deduplicated.</li>
                     </ul>
                 </div>
                 <div>
