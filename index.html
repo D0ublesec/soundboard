@@ -1942,6 +1942,94 @@ function toggleSceneLoop(groupIndex) {
     renderGroupsModal();
 }
 
+// Fade out and stop all active sounds
+function fadeOutAllSounds(duration = 500) {
+    const fadeOutSounds = Object.entries(activeSounds).filter(([id, sound]) => sound.isPlaying);
+    if (fadeOutSounds.length === 0) return Promise.resolve();
+    
+    return new Promise((resolve) => {
+        const fadeOutPromises = fadeOutSounds.map(([soundId, sound]) => {
+            return new Promise((resolveSound) => {
+                const audio = audioElements[soundId];
+                if (!audio || audio.paused) {
+                    resolveSound();
+                    return;
+                }
+                
+                const startVolume = audio.volume;
+                const startTime = Date.now();
+                const fadeInterval = setInterval(() => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const newVolume = startVolume * (1 - progress);
+                    
+                    if (audio && !audio.paused) {
+                        try {
+                            audio.volume = newVolume;
+                        } catch(e) {}
+                    }
+                    
+                    if (progress >= 1 || !audio || audio.paused) {
+                        clearInterval(fadeInterval);
+                        if (audio) {
+                            audio.pause();
+                            audio.currentTime = 0;
+                            audio.volume = startVolume; // Restore volume
+                        }
+                        if (activeSounds[soundId]) {
+                            activeSounds[soundId].isPlaying = false;
+                        }
+                        resolveSound();
+                    }
+                }, 16); // ~60fps
+            });
+        });
+        
+        Promise.all(fadeOutPromises).then(() => {
+            // Clear all active sounds after fade out
+            fadeOutSounds.forEach(([soundId]) => {
+                if (activeSounds[soundId]) {
+                    delete activeSounds[soundId];
+                }
+            });
+            resolve();
+        });
+    });
+}
+
+// Fade in a sound
+function fadeInSound(soundId, targetVolume, duration = 500) {
+    const audio = audioElements[soundId];
+    if (!audio) return;
+    
+    audio.volume = 0; // Start at 0
+    if (audio.paused) {
+        audio.play().catch(() => {});
+    }
+    
+    const startTime = Date.now();
+    const fadeInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const newVolume = targetVolume * progress;
+        
+        if (audio && !audio.paused) {
+            try {
+                audio.volume = newVolume;
+            } catch(e) {}
+        }
+        
+        if (progress >= 1) {
+            clearInterval(fadeInterval);
+            if (audio) {
+                try {
+                    audio.volume = targetVolume;
+                } catch(e) {}
+            }
+        }
+    }, 16); // ~60fps
+}
+
 function playSoundGroup(groupIndex) {
     const group = soundGroups[groupIndex];
     if (!group) return;
@@ -1949,8 +2037,10 @@ function playSoundGroup(groupIndex) {
     const delays = group.delays || {};
     const shouldLoop = group.loop || false;
     
-    // Play all sounds in the group with their default volumes and delays
-    group.soundIds.forEach(soundId => {
+    // Fade out all currently active sounds first
+    fadeOutAllSounds(500).then(() => {
+        // Play all sounds in the group with their default volumes and delays
+        group.soundIds.forEach(soundId => {
         const found = findSoundById(soundId);
         if (found) {
             const { sound, category } = found;
@@ -1974,10 +2064,16 @@ function playSoundGroup(groupIndex) {
                     playSound(sound.id, sound.name, sound.url, category, sound.icon);
                 }
                 
-                // Ensure volume is set after playing
+                // Fade in the sound after a brief moment to ensure it's playing
                 setTimeout(() => {
                     const audio = audioElements[sound.id];
-                    if (audio) {
+                    if (audio && !audio.paused && activeSounds[sound.id]) {
+                        fadeInSound(sound.id, defaultVol, 500);
+                        if (activeSounds[sound.id]) {
+                            activeSounds[sound.id].volume = defaultVol;
+                        }
+                    } else if (audio) {
+                        // If not playing yet, set volume directly
                         audio.volume = defaultVol;
                         if (activeSounds[sound.id]) {
                             activeSounds[sound.id].volume = defaultVol;
@@ -1992,6 +2088,7 @@ function playSoundGroup(groupIndex) {
                 playDelayedSound();
             }
         }
+        });
     });
     closeGroupsModal();
     render();
@@ -2851,7 +2948,16 @@ if (activeSoundsCount > 0) {
             const updateVolume = (vol) => {
                 const audio = audioElements[soundId];
                 if (audio) {
-                    audio.volume = vol;
+                    // Use requestAnimationFrame for iOS compatibility - ensures volume is set during gesture
+                    requestAnimationFrame(() => {
+                        if (audio) {
+                            audio.volume = vol;
+                        }
+                    });
+                    // Also set immediately (synchronous)
+                    try {
+                        audio.volume = vol;
+                    } catch(e) {}
                 }
                 if (activeSounds[soundId]) {
                     activeSounds[soundId].volume = vol;
@@ -2876,26 +2982,59 @@ if (activeSoundsCount > 0) {
             // Use multiple event types for iOS compatibility
             slider.addEventListener('input', handleInput, { passive: false });
             slider.addEventListener('change', handleInput, { passive: false });
+            
+            // iOS-specific touch handlers
+            let touchStartVol = null;
             slider.addEventListener('touchstart', (e) => {
-                // Establish gesture context for iOS - ensure audio is "unlocked"
+                // Capture current volume and establish gesture context
                 const audio = audioElements[soundId];
-                if (audio && audio.paused === false) {
-                    // Audio is playing, ensure volume property is accessible
-                    audio.volume = audio.volume;
+                if (audio) {
+                    touchStartVol = audio.volume;
+                    // Ensure audio is "unlocked" by accessing volume property
+                    if (!audio.paused) {
+                        audio.volume = audio.volume;
+                    }
                 }
                 e.stopPropagation();
-            }, { passive: false });
+            }, { passive: false, capture: true });
+            
             slider.addEventListener('touchmove', (e) => {
+                // Update volume during touch move - critical for iOS
                 const vol = parseFloat(e.target.value);
-                updateVolume(vol);
+                const audio = audioElements[soundId];
+                if (audio && !audio.paused) {
+                    // Set volume immediately during touch gesture
+                    requestAnimationFrame(() => {
+                        if (audio && !audio.paused) {
+                            audio.volume = vol;
+                        }
+                    });
+                    audio.volume = vol;
+                }
+                if (activeSounds[soundId]) {
+                    activeSounds[soundId].volume = vol;
+                }
                 e.stopPropagation();
-            }, { passive: false });
+            }, { passive: false, capture: true });
+            
             slider.addEventListener('touchend', (e) => {
                 const vol = parseFloat(e.target.value);
-                updateVolume(vol);
+                const audio = audioElements[soundId];
+                if (audio) {
+                    requestAnimationFrame(() => {
+                        if (audio) {
+                            audio.volume = vol;
+                        }
+                    });
+                    audio.volume = vol;
+                }
+                if (activeSounds[soundId]) {
+                    activeSounds[soundId].volume = vol;
+                }
                 saveVolume(vol);
                 e.stopPropagation();
-            }, { passive: false });
+            }, { passive: false, capture: true });
+            
             slider.addEventListener('pointermove', (e) => {
                 const vol = parseFloat(e.target.value);
                 updateVolume(vol);
