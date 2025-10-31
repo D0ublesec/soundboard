@@ -197,20 +197,20 @@ body.light-mode {
 
         <!-- Favorites Section -->
         <div id="favorites-section" class="mb-4">
-            <div class="flex justify-between items-center mb-3">
+            <div class="mb-3">
                 <h2 class="text-xl font-semibold flex items-center gap-2">
                     <svg class="w-5 h-5 fill-yellow-400 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    Favorites
+                    Favourites
                 </h2>
-                <button onclick="clearAllFavorites()" class="px-3 py-2 rounded bg-rose-600 hover:bg-rose-700 text-sm flex items-center gap-1">
-                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    <span>Clear</span>
-                </button>
             </div>
             <div class="flex flex-wrap gap-2 p-2 bg-slate-800/40 border border-slate-700 rounded-xl mb-3">
                 <button onclick="openSessionsModal()" class="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-sm">Game Sessions</button>
                 <button onclick="exportFavorites()" class="px-3 py-2 rounded bg-indigo-600 hover:bg-indigo-700 text-sm">Export</button>
                 <button onclick="openImportModal()" class="px-3 py-2 rounded bg-purple-600 hover:bg-purple-700 text-sm">Import</button>
+                <button onclick="clearAllFavorites()" class="px-3 py-2 rounded bg-rose-600 hover:bg-rose-700 text-sm flex items-center gap-1">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <span>Clear</span>
+                </button>
                 <button onclick="openPresetModal()" class="px-3 py-2 rounded bg-emerald-600 hover:bg-emerald-700 text-sm flex items-center gap-1">
                     <span>🎛️</span>
                     <span>Presets</span>
@@ -366,33 +366,75 @@ body.light-mode {
             </div>
             <div class="p-4 space-y-4 text-sm md:text-base">
                 <div>
-                    <h4 class="font-semibold mb-1">Using Bloopr</h4>
+                    <h4 class="font-semibold mb-1">Playing Sounds</h4>
                     <ul class="list-disc pl-5 text-slate-300">
-                        <li>Tap a sound to Play/Pause. Use Loop to repeat.</li>
-                        <li>Priority ducks other sounds while it plays.</li>
-                        <li>Active bar shows volume, loop, pause, stop for each playing sound.</li>
-                        <li>Search finds sounds and jumps to them.</li>
+                        <li>Tap a sound card to Play/Pause. Use the Loop button to repeat automatically.</li>
+                        <li>Priority mode ducks other sounds to 30% volume while priority sound plays.</li>
+                        <li>Volume is remembered for each sound when replayed.</li>
+                        <li>Active Sounds bar at the bottom shows all playing sounds with controls.</li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="font-semibold mb-1">Favorites, Game Sessions, Presets</h4>
+                    <h4 class="font-semibold mb-1">Quick Actions</h4>
                     <ul class="list-disc pl-5 text-slate-300">
-                        <li>Favorites are saved per Game Session. Use Game Sessions to create/switch/rename.</li>
-                        <li>Presets quickly load curated sets.</li>
+                        <li><strong>Search:</strong> Find sounds by name, icon, or category.</li>
+                        <li><strong>Dice:</strong> Roll d4, d6, d8, d10, d12, d20, or d100.</li>
+                        <li><strong>Coin:</strong> Flip a coin with animation.</li>
+                        <li><strong>Scenes:</strong> Create groups of sounds that play together with preset volumes.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-1">Favourites & Game Sessions</h4>
+                    <ul class="list-disc pl-5 text-slate-300">
+                        <li>Star any sound to add it to Favourites for quick access.</li>
+                        <li>Favourites are saved per Game Session. Create multiple sessions for different games.</li>
+                        <li>Use Game Sessions to switch between saved sound sets.</li>
+                        <li>Category star icon favourites/unfavourites all sounds in that category.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-1">Scenes</h4>
+                    <ul class="list-disc pl-5 text-slate-300">
+                        <li>Create Scenes to group multiple sounds that play together.</li>
+                        <li>Set default volumes for each sound in a scene for perfect mixing.</li>
+                        <li>Edit scenes to adjust sounds and volumes anytime.</li>
+                        <li>Tap a scene card to play all sounds with their preset volumes.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-1">Presets</h4>
+                    <ul class="list-disc pl-5 text-slate-300">
+                        <li>Presets quickly load curated sound sets for specific game themes.</li>
+                        <li>Includes game-specific presets (Gloomhaven, Everdell, Night Cage, etc.).</li>
+                        <li>Applying a preset adds sounds to favourites and expands relevant categories.</li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-semibold mb-1">Import/Export</h4>
                     <ul class="list-disc pl-5 text-slate-300">
-                        <li>Export downloads a JSON of sound names.</li>
-                        <li>Import accepts a JSON of names; unknown names are skipped with a note.</li>
+                        <li>Export downloads favourites and scenes as JSON.</li>
+                        <li>Import restores favourites and scenes from a JSON file.</li>
+                        <li>Exported files include sound names and scene volumes.</li>
+                        <li>Unknown sound names are skipped with a notification.</li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="font-semibold mb-1">Mobile tips</h4>
+                    <h4 class="font-semibold mb-1">Keyboard Shortcuts (PC)</h4>
                     <ul class="list-disc pl-5 text-slate-300">
-                        <li>Use Expand on the Active bar to see more at once.</li>
-                        <li>Buttons are touch-friendly; rotate for wider layouts.</li>
+                        <li><strong>Space:</strong> Play/Pause all active sounds</li>
+                        <li><strong>S:</strong> Stop all sounds</li>
+                        <li><strong>/:</strong> Open search</li>
+                        <li><strong>1-9:</strong> Play favourite sound at that position</li>
+                        <li><strong>Escape:</strong> Close any modal</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-1">Tips</h4>
+                    <ul class="list-disc pl-5 text-slate-300">
+                        <li>Use Expand/Collapse All to quickly browse categories.</li>
+                        <li>Active bar can be expanded to half screen for easier control.</li>
+                        <li>Long-press or hover on buttons for tooltips.</li>
+                        <li>All data is saved locally in your browser.</li>
                     </ul>
                 </div>
             </div>
@@ -767,13 +809,6 @@ body.light-mode {
         { id: 'polar-wind', name: 'Polar Wind', url: '/sounds/arctic/wind.wav', icon: '💨' }
     ],
 
-    'Jungle & Savannah': [
-        { id: 'jungle-ambience', name: 'Jungle Ambience', url: '/sounds/jungle/ambience.wav', icon: '🌴' },
-        { id: 'monkeys', name: 'Monkey Calls', url: '/sounds/jungle/monkeys.wav', icon: '🐒' },
-        { id: 'big-cat', name: 'Big Cat Growl', url: '/sounds/jungle/cat.wav', icon: '🐆' },
-        { id: 'insects', name: 'Insect Swarm', url: '/sounds/jungle/insects.wav', icon: '🐜' }
-    ],
-
     'Temple & Ritual': [
         { id: 'chanting', name: 'Monk Chanting', url: '/sounds/temple/chant.wav', icon: '🛕' },
         { id: 'gong', name: 'Gong Hit', url: '/sounds/temple/gong.wav', icon: '🥁' },
@@ -918,7 +953,7 @@ const presets = {
     'Night Cage': {
         icon: '🕯️',
         description: 'Claustrophobic darkness, whispers and echoing steps.',
-        ids: ['dungeon-ambience','echo-steps','chains','door-creak','whispers','breathing','light-flicker','fog','trap-trigger']
+        ids: ['dungeon-ambience','echo-steps','chains','door-creak','whispers','breathing','fog','trap-trigger']
     },
     'Nyctophobia': {
         icon: '🌑',
@@ -948,7 +983,7 @@ const presets = {
     'Stormy Night': {
         icon: '⛈️',
         description: 'Rain, thunder and occasional creaks inside.',
-        ids: ['rain-heavy','thunder','wind-storm','door-creak','clock-ticking','light-flicker']
+        ids: ['rain-heavy','thunder','wind-storm','door-creak','clock-ticking']
     },
     'Ocean Voyage': {
         icon: '⛵',
@@ -1329,7 +1364,7 @@ function closeConfirmModal() {
 }
 function openConfirmClear(id) {
     const s = sessions.find(x => x.id===id);
-    openConfirm('Clear Game Session', `Clear all favorites in "${s ? s.name : ''}"?`, 'clear', id, null);
+    openConfirm('Clear Game Session', `Clear all favourites in "${s ? s.name : ''}"?`, 'clear', id, null);
 }
 function openConfirmDelete(id) {
     const s = sessions.find(x => x.id===id);
@@ -1898,9 +1933,9 @@ function importFavoritesFromInput() {
             closeIOModal();
             let noticeMsg = '';
             if (missing.length) {
-                noticeMsg += `Favorites imported with ${missing.length} sound${missing.length !== 1 ? 's' : ''} not found: ${missing.slice(0,5).join(', ')}${missing.length>5 ? '…' : ''}. `;
+                noticeMsg += `Favourites imported with ${missing.length} sound${missing.length !== 1 ? 's' : ''} not found: ${missing.slice(0,5).join(', ')}${missing.length>5 ? '…' : ''}. `;
             } else {
-                noticeMsg += 'Favorites imported. ';
+                noticeMsg += 'Favourites imported. ';
             }
             if (scenesImported > 0) {
                 noticeMsg += `${scenesImported} scene${scenesImported !== 1 ? 's' : ''} imported.`;
@@ -1908,7 +1943,7 @@ function importFavoritesFromInput() {
                     noticeMsg += ` ${scenesMissing} sound${scenesMissing !== 1 ? 's' : ''} in scenes not found.`;
                 }
             }
-            showNotice(noticeMsg || 'Favorites imported.');
+            showNotice(noticeMsg || 'Favourites imported.');
         } catch (e) {
             if (err){err.textContent='Incorrect file format. Export a sample to see the expected JSON.'; err.classList.remove('hidden');}
         }
@@ -2241,7 +2276,7 @@ const categoriesHtml = Object.keys(soundLibrary).map(category => {
     </button>
     <button onclick="event.stopPropagation(); favoriteCategory('${category}')" 
         class="px-4 py-4 hover:bg-slate-700/50 transition-colors border-l border-slate-700" 
-        title="${allFavorited ? 'Unfavorite all in this category' : 'Favorite all in this category'}">
+        title="${allFavorited ? 'Unfavourite all in this category' : 'Favourite all in this category'}">
         <span class="text-xl">${allFavorited ? '⭐' : '☆'}</span>
     </button>
 </div>
