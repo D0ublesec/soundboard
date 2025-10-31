@@ -75,7 +75,16 @@ body.light-mode {
 .light-mode #active-sounds-bar { background-color: rgba(248,250,252,0.95) !important; }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white relative">
+    <!-- Corner Ribbon -->
+    <a id="buy-me-coffee-ribbon" href="#" target="_blank" rel="noopener noreferrer" class="absolute top-0 left-0 z-40 block overflow-hidden w-32 h-32">
+        <div class="absolute -left-8 top-8 w-40 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[11px] font-semibold py-1.5 px-2 shadow-xl" style="transform: rotate(-45deg);">
+            <div class="flex items-center gap-1 justify-center">
+                <span>☕</span>
+                <span>Buy me a coffee</span>
+            </div>
+        </div>
+    </a>
     <div class="container mx-auto px-4 py-8 pb-32">
         <div class="relative mb-4">
             <div class="absolute right-0 top-0 flex items-center gap-2">
@@ -129,6 +138,17 @@ body.light-mode {
 <div id="categories-container"></div>
 
         <!-- Sound Grid removed: categories now handle listing -->
+        
+        <!-- Footer -->
+        <div class="mt-8 pt-6 pb-4 text-center text-xs text-slate-400 border-t border-slate-700/50">
+            <div class="flex items-center justify-center gap-3 flex-wrap">
+                <span>Created by Liam Double</span>
+                <span class="text-slate-600">•</span>
+                <a id="buy-me-coffee-footer" href="#" target="_blank" rel="noopener noreferrer" class="text-slate-300 hover:text-amber-400 transition-colors inline-flex items-center gap-1">
+                    ☕ Buy me a coffee
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- Active Sounds Bar -->
@@ -610,6 +630,17 @@ const categoryIcons = {
     'Stealth & Espionage': '🕵️',
     'Vehicles & Travel': '🛞'
 };
+
+// Buy Me a Coffee link
+const BUY_ME_A_COFFEE_LINK = 'https://buymeacoffee.com/liamdouble';
+
+// Set Buy Me a Coffee links
+document.addEventListener('DOMContentLoaded', () => {
+    const ribbon = document.getElementById('buy-me-coffee-ribbon');
+    const footer = document.getElementById('buy-me-coffee-footer');
+    if (ribbon) ribbon.href = BUY_ME_A_COFFEE_LINK;
+    if (footer) footer.href = BUY_ME_A_COFFEE_LINK;
+});
 
         // State Management
         let activeSounds = {};
@@ -1625,14 +1656,3 @@ if (activeSoundsCount > 0) {
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
