@@ -1943,7 +1943,7 @@ function toggleSceneLoop(groupIndex) {
 }
 
 // Fade out and stop all active sounds
-function fadeOutAllSounds(duration = 500) {
+function fadeOutAllSounds(duration = 1000) {
     const fadeOutSounds = Object.entries(activeSounds).filter(([id, sound]) => sound.isPlaying);
     if (fadeOutSounds.length === 0) return Promise.resolve();
     
@@ -1998,7 +1998,7 @@ function fadeOutAllSounds(duration = 500) {
 }
 
 // Fade in a sound
-function fadeInSound(soundId, targetVolume, duration = 500) {
+function fadeInSound(soundId, targetVolume, duration = 1000) {
     const audio = audioElements[soundId];
     if (!audio) return;
     
@@ -2037,58 +2037,60 @@ function playSoundGroup(groupIndex) {
     const delays = group.delays || {};
     const shouldLoop = group.loop || false;
     
-    // Fade out all currently active sounds first
-    fadeOutAllSounds(500).then(() => {
-        // Play all sounds in the group with their default volumes and delays
-        group.soundIds.forEach(soundId => {
-        const found = findSoundById(soundId);
-        if (found) {
-            const { sound, category } = found;
-            const defaultVol = volumes[soundId] !== undefined ? volumes[soundId] : getVolumeMemory(sound.id);
-            const delay = delays[soundId] || 0;
-            
-            // Set volume memory first so playSound uses it
-            const volumeMem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}');
-            volumeMem[sound.id] = defaultVol;
-            localStorage.setItem('soundboard-volumeMemory', JSON.stringify(volumeMem));
-            
-            // Play sound with delay
-            const playDelayedSound = () => {
-                // If scene looping is enabled AND sound has no delay, set loop before playing
-                // Sounds with delays should never loop (they're typically one-time events)
-                if (shouldLoop && delay === 0) {
-                    setLoopBeforePlay(sound.id, sound.name, sound.url, category, sound.icon);
-                    // Actually play it
-                    playSound(sound.id, sound.name, sound.url, category, sound.icon);
-                } else {
-                    playSound(sound.id, sound.name, sound.url, category, sound.icon);
+    // Fade out all currently active sounds first (1000ms fade out)
+    fadeOutAllSounds(1000).then(() => {
+            // Wait a brief moment after fade out completes before starting new scene
+        setTimeout(() => {
+            // Play all sounds in the group with their default volumes and delays
+            group.soundIds.forEach(soundId => {
+                const found = findSoundById(soundId);
+                if (found) {
+                    const { sound, category } = found;
+                    const defaultVol = volumes[soundId] !== undefined ? volumes[soundId] : getVolumeMemory(sound.id);
+                    const delay = delays[soundId] || 0;
+                    
+                    // Set volume memory first so playSound uses it
+                    const volumeMem = JSON.parse(localStorage.getItem('soundboard-volumeMemory') || '{}');
+                    volumeMem[sound.id] = defaultVol;
+                    localStorage.setItem('soundboard-volumeMemory', JSON.stringify(volumeMem));
+                    
+                    // Play sound function - starts playing then fades in
+                    const playSoundAndFadeIn = () => {
+                        // If scene looping is enabled AND sound has no delay, set loop before playing
+                        // Sounds with delays should never loop (they're typically one-time events)
+                        if (shouldLoop && delay === 0) {
+                            setLoopBeforePlay(sound.id, sound.name, sound.url, category, sound.icon);
+                            // Actually play it
+                            playSound(sound.id, sound.name, sound.url, category, sound.icon);
+                        } else {
+                            playSound(sound.id, sound.name, sound.url, category, sound.icon);
+                        }
+                        
+                        // Fade in the sound after a brief moment to ensure it's playing
+                        setTimeout(() => {
+                            const audio = audioElements[sound.id];
+                            if (audio && !audio.paused && activeSounds[sound.id]) {
+                                fadeInSound(sound.id, defaultVol, 1000);
+                                if (activeSounds[sound.id]) {
+                                    activeSounds[sound.id].volume = defaultVol;
+                                }
+                            } else if (audio) {
+                                // If not playing yet, set volume directly
+                                audio.volume = defaultVol;
+                                if (activeSounds[sound.id]) {
+                                    activeSounds[sound.id].volume = defaultVol;
+                                }
+                            }
+                        }, 100);
+                    };
+                    
+                    // Account for delay: wait for delay time AFTER fade out completes
+                    // Then play the sound (which will fade in)
+                    const delayMs = delay * 1000;
+                    setTimeout(playSoundAndFadeIn, delayMs);
                 }
-                
-                // Fade in the sound after a brief moment to ensure it's playing
-                setTimeout(() => {
-                    const audio = audioElements[sound.id];
-                    if (audio && !audio.paused && activeSounds[sound.id]) {
-                        fadeInSound(sound.id, defaultVol, 500);
-                        if (activeSounds[sound.id]) {
-                            activeSounds[sound.id].volume = defaultVol;
-                        }
-                    } else if (audio) {
-                        // If not playing yet, set volume directly
-                        audio.volume = defaultVol;
-                        if (activeSounds[sound.id]) {
-                            activeSounds[sound.id].volume = defaultVol;
-                        }
-                    }
-                }, 100);
-            };
-            
-            if (delay > 0) {
-                setTimeout(playDelayedSound, delay * 1000);
-            } else {
-                playDelayedSound();
-            }
-        }
-        });
+            });
+        }, 100); // Small buffer after fade out
     });
     closeGroupsModal();
     render();
@@ -2948,13 +2950,7 @@ if (activeSoundsCount > 0) {
             const updateVolume = (vol) => {
                 const audio = audioElements[soundId];
                 if (audio) {
-                    // Use requestAnimationFrame for iOS compatibility - ensures volume is set during gesture
-                    requestAnimationFrame(() => {
-                        if (audio) {
-                            audio.volume = vol;
-                        }
-                    });
-                    // Also set immediately (synchronous)
+                    // Direct synchronous volume set - critical for iOS
                     try {
                         audio.volume = vol;
                     } catch(e) {}
@@ -2974,66 +2970,98 @@ if (activeSoundsCount > 0) {
             
             const handleInput = (e) => {
                 const vol = parseFloat(e.target.value);
-                updateVolume(vol);
+                const audio = audioElements[soundId];
+                
+                // For iOS: ensure audio is playing and set volume directly
+                if (audio && !audio.paused) {
+                    // Direct synchronous assignment - must be in user gesture
+                    audio.volume = vol;
+                }
+                
+                if (activeSounds[soundId]) {
+                    activeSounds[soundId].volume = vol;
+                }
                 saveVolume(vol);
                 e.stopPropagation();
             };
             
             // Use multiple event types for iOS compatibility
-            slider.addEventListener('input', handleInput, { passive: false });
+            // Input event is critical for iOS - must be non-passive
+            slider.addEventListener('input', handleInput, { passive: false, capture: false });
             slider.addEventListener('change', handleInput, { passive: false });
             
-            // iOS-specific touch handlers
+            // iOS-specific touch handlers - direct synchronous volume setting
             let touchStartVol = null;
+            let isDragging = false;
             slider.addEventListener('touchstart', (e) => {
-                // Capture current volume and establish gesture context
+                isDragging = true;
                 const audio = audioElements[soundId];
                 if (audio) {
                     touchStartVol = audio.volume;
-                    // Ensure audio is "unlocked" by accessing volume property
+                    // Establish gesture context - set volume property directly
                     if (!audio.paused) {
-                        audio.volume = audio.volume;
+                        // Direct synchronous assignment - critical for iOS
+                        const currentVol = audio.volume;
+                        audio.volume = currentVol;
                     }
                 }
                 e.stopPropagation();
-            }, { passive: false, capture: true });
+            }, { passive: false, capture: false });
             
             slider.addEventListener('touchmove', (e) => {
-                // Update volume during touch move - critical for iOS
-                const vol = parseFloat(e.target.value);
+                if (!isDragging) return;
+                e.preventDefault(); // Prevent default to ensure gesture context
                 const audio = audioElements[soundId];
-                if (audio && !audio.paused) {
-                    // Set volume immediately during touch gesture
-                    requestAnimationFrame(() => {
-                        if (audio && !audio.paused) {
-                            audio.volume = vol;
-                        }
-                    });
-                    audio.volume = vol;
+                
+                if (!audio || audio.paused) {
+                    e.stopPropagation();
+                    return;
                 }
+                
+                // Calculate volume from touch position for more reliable iOS handling
+                const rect = slider.getBoundingClientRect();
+                const touch = e.touches[0] || e.changedTouches[0];
+                const x = touch.clientX - rect.left;
+                const percentage = Math.max(0, Math.min(1, x / rect.width));
+                const vol = percentage;
+                
+                // Set volume immediately and synchronously - iOS requires this in the touch event
+                // No async, no delays, no calculations after this point
+                audio.volume = vol;
+                slider.value = vol;
+                
+                // Update state immediately
                 if (activeSounds[soundId]) {
                     activeSounds[soundId].volume = vol;
                 }
+                
                 e.stopPropagation();
-            }, { passive: false, capture: true });
+            }, { passive: false, capture: false });
             
             slider.addEventListener('touchend', (e) => {
+                isDragging = false;
                 const vol = parseFloat(e.target.value);
                 const audio = audioElements[soundId];
+                
+                // Final synchronous volume set on touch end
                 if (audio) {
-                    requestAnimationFrame(() => {
-                        if (audio) {
-                            audio.volume = vol;
-                        }
-                    });
                     audio.volume = vol;
                 }
+                
                 if (activeSounds[soundId]) {
                     activeSounds[soundId].volume = vol;
                 }
+                
+                // Save to localStorage (async is OK here)
                 saveVolume(vol);
                 e.stopPropagation();
-            }, { passive: false, capture: true });
+            }, { passive: false, capture: false });
+            
+            // Also handle touchcancel
+            slider.addEventListener('touchcancel', (e) => {
+                isDragging = false;
+                e.stopPropagation();
+            }, { passive: false });
             
             slider.addEventListener('pointermove', (e) => {
                 const vol = parseFloat(e.target.value);
