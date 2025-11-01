@@ -139,17 +139,6 @@ If you find Harmonomancer useful for your gaming sessions, consider:
 - 🎵 **Contributing new sounds or categories**
 - ☕ **[Buying me a coffee](https://buymeacoffee.com/liamdouble)**
 
-## 🎯 Roadmap
-
-- [ ] Cloud sync for sessions and favorites
-- [ ] Collaborative sessions for remote play
-- [ ] Advanced sound mixing controls
-- [ ] Plugin system for custom integrations
-- [ ] Mobile app versions
-- [ ] Integration with popular VTT platforms
-
----
-
 **Created by Liam Double** | [Buy me a coffee ☕](https://buymeacoffee.com/liamdouble)
 
 *Enhance your tabletop adventures with the power of sound!*
