@@ -9,7 +9,7 @@ A powerful, web-based soundboard designed for tabletop RPG sessions and immersiv
 ### 🎵 Comprehensive Sound Library
 - **20+ Categories** including Tavern & Inn, Combat & Battle, Magic & Spells, Horror & Suspense, and more
 - **200+ High-Quality Sounds** covering every gaming scenario
-- **Smart Tagging System** for easy discovery (ambient, event, loop, subtle, creature)
+- **Color-Coded Tagging System** for easy discovery and visual identification
 
 ### 🎭 Scene Management
 - **Custom Scenes** - Group multiple sounds that play together with preset volumes and delays
@@ -31,6 +31,7 @@ A powerful, web-based soundboard designed for tabletop RPG sessions and immersiv
 
 ### 🎯 User Experience
 - **Quick Search** - Find sounds instantly by name, category, or tags
+- **Color-Coded Tags** - Visual identification of sound types with distinct colors
 - **Keyboard Shortcuts** - Efficient controls for power users
 - **Mobile Responsive** - Works perfectly on tablets and phones
 - **Light/Dark Mode** - Choose your preferred theme
@@ -98,6 +99,16 @@ harmonomancer/
 └── README.md               # This file
 ```
 
+## 🏷️ Sound Tag System
+
+Each sound is tagged with colored labels to help you quickly identify its type and purpose:
+
+- 🔵 **Ambient** - Background sounds that loop continuously (forest ambience, tavern crowds, etc.)
+- 🟠 **Event** - One-time sound effects for specific actions (sword clashes, door slams, etc.)
+- 🟢 **Loop** - Sounds designed to repeat seamlessly (music, rain, wind, etc.)
+- 🟣 **Subtle** - Quiet, atmospheric sounds (whispers, breathing, soft footsteps, etc.)
+- 🔴 **Creature** - Animal or monster sounds (dragon roars, wolf howls, zombie groans, etc.)
+
 ## 🎵 Sound Categories
 
 - 🍺 **Tavern & Inn** - Crowds, music, fireplace, ale pouring
@@ -138,6 +149,8 @@ If you find Harmonomancer useful for your gaming sessions, consider:
 - 🐛 **Reporting bugs or suggesting features**
 - 🎵 **Contributing new sounds or categories**
 - ☕ **[Buying me a coffee](https://buymeacoffee.com/liamdouble)**
+
+---
 
 **Created by Liam Double** | [Buy me a coffee ☕](https://buymeacoffee.com/liamdouble)
 
