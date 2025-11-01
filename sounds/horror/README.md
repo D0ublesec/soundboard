@@ -22,7 +22,7 @@ heavy-breathing.wav renamed from woman breathing heavily horror stress sex.wav b
 light-match.wav renamed from Lighting a single match by 140178sound -- https://freesound.org/s/325559/ -- License: Attribution NonCommercial 3.0
 flame-death.wav renamed from Cigarete.wav by HermanusAMarais -- https://freesound.org/s/492799/ -- License: Attribution 3.0
 unlock-door.wav renamed from Unlocking - Locking Door and Keys Rattling.wav by nickrandomsounds -- https://freesound.org/s/615287/ -- License: Creative Commons 0
-chains.wav renamed from Chains - heavy by Vrymaa -- https://freesound.org/s/734608/ -- License: Creative Commons 0
+chains-dragging.wav renamed from Chains - heavy by Vrymaa -- https://freesound.org/s/734608/ -- License: Creative Commons 0
 ambience1.wav renamed from Bugs, Bats and Bells Soundscape by CrashBulb -- https://freesound.org/s/795915/ -- License: Creative Commons 0
 ambience2.wav renamed from Torturous Hell Soundscape v1 by thompsonse -- https://freesound.org/s/785700/ -- License: Creative Commons 0
 
@@ -60,4 +60,4 @@ depths-of-hell.flac by ElanHickler -- https://freesound.org/s/108906/ -- License
 
 RUSTY HOOKS.wav by Eyelids-pie -- https://freesound.org/s/86316/ -- License: Creative Commons 0
 
-ambience3.wav renamed from Action Music Loop 2 "Hunted" by MathewHenry -- https://freesound.org/s/685597/ -- License: Attribution 4.0
+horror-ambience3.wav renamed from Action Music Loop 2 "Hunted" by MathewHenry -- https://freesound.org/s/685597/ -- License: Attribution 4.0

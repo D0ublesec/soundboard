@@ -638,7 +638,7 @@ body.light-mode {
     'Magic & Spells': [
         { id: 'fireball', name: 'Fireball', url: '/sounds/magic/fireball.wav', icon: '🔥' },
         { id: 'ice-spell', name: 'Ice Spell', url: '/sounds/magic/ice-spell.wav', icon: '❄️' },
-        { id: 'lightning-bolt', name: 'Lightning Bolt', url: '/sounds/magic/lightning-bolt.wav', icon: '⚡' },
+        { id: 'thunderstrike', name: 'ThunderStrike', url: '/sounds/magic/thunderstrike.wav', icon: '⚡' },
         { id: 'heal-spell', name: 'Healing Spell', url: '/sounds/magic/healing-spell.wav', icon: '✨' },
         { id: 'teleport', name: 'Teleport', url: '/sounds/magic/teleport.wav', icon: '💫' },
         { id: 'dark-teleport', name: 'Dark Teleport', url: '/sounds/magic/dark-teleport.wav', icon: '💫𖤐' },
@@ -657,16 +657,15 @@ body.light-mode {
     ],
     
     'Dungeon & Cave': [
-        { id: 'dungeon-ambience', name: 'Dungeon Ambience', url: '/sounds/dungeon/ambience.wav', icon: '🏰' },
-        { id: 'water-drip', name: 'Water Dripping', url: '/sounds/dungeon/drip.wav', icon: '💧' },
-        { id: 'chains', name: 'Rattling Chains', url: '/sounds/dungeon/chains.wav', icon: '⛓️' },
-        { id: 'stone-door', name: 'Stone Door', url: '/sounds/dungeon/stone-door.wav', icon: '🚪' },
-        { id: 'torch', name: 'Torch Burning', url: '/sounds/dungeon/torch.wav', icon: '🔦' },
-        { id: 'echo-steps', name: 'Echoing Steps', url: '/sounds/dungeon/echo.wav', icon: '👣' },
+        { id: 'dungeon-ambience', name: 'Dungeon Ambience', url: '/sounds/dungeon/dungeon-ambience.wav', icon: '🏰' },
+        { id: 'water-drip', name: 'Water Dripping', url: '/sounds/dungeon/water-drip.wav', icon: '💧' },
+        { id: 'rattling-chains', name: 'Rattling Chains', url: '/sounds/dungeon/rattling-chains.mp3', icon: '⛓️' },
+        { id: 'flame-ignition', name: 'Flame Ignition', url: '/sounds/dungeon/flame-ignition.wav', icon: '𓆱🔥' },
+        { id: 'flame-torch-swinging-quickly', name: 'Torch Swinging Quickly', url: '/sounds/dungeon/flame-torch-swinging-quickly.wav', icon: '𓆱🔥༄' },
+        { id: 'flame-torch', name: 'Flame Torch Burning', url: '/sounds/dungeon/flame-torch.wav', icon: '𓆱🔥' },
         { id: 'trap-trigger', name: 'Trap Triggered', url: '/sounds/dungeon/trap.wav', icon: '⚠️' },
         { id: 'cave-in', name: 'Cave-In Rumble', url: '/sounds/dungeon/cavein.wav', icon: '🪨' },
-        { id: 'door-iron', name: 'Iron Gate', url: '/sounds/dungeon/iron-gate.wav', icon: '🗝️' },
-        { id: 'torch-extinguish', name: 'Torch Extinguish', url: '/sounds/dungeon/torch-out.wav', icon: '🕯️' },
+        { id: 'flame-death', name: 'Flame Death', url: '/sounds/horror/flame-death.wav', icon: '🕯️' },
         { id: 'rat-scurries', name: 'Rats Scurrying', url: '/sounds/dungeon/rats.wav', icon: '🐀' },
         { id: 'pickaxe', name: 'Pickaxe Strikes', url: '/sounds/dungeon/pickaxe.wav', icon: '⛏️' }
     ],
@@ -758,11 +757,15 @@ body.light-mode {
     ],
     
     'Doors & Movement': [
-		{ id: 'door-open', name: 'Door Opens', url: '/sounds/doors/door.wav', icon: '🚪' },
+		{ id: 'door-open', name: 'Door Opens', url: '/sounds/doors/door-opens-squeak.wav', icon: '🚪' },
+        { id: 'stone-door', name: 'Stone Door', url: '/sounds/doors/stone-door-opens.wav', icon: '🪨🚪' },
+        { id: 'heavy-stone-door', name: 'Heavy Stone Door', url: '/sounds/doors/heavy-stone-door-opens.mp3', icon: '🪨💪🚪' },
+        { id: 'door-iron', name: 'Iron Gate', url: '/sounds/doors/iron-gate.wav', icon: '🗝️' },
         { id: 'door-creak', name: 'Door Creaking', url: '/sounds/doors/creak.wav', icon: '🚪' },
         { id: 'door-slam', name: 'Door Slam', url: '/sounds/doors/slam.wav', icon: '💥' },
         { id: 'footsteps-wood', name: 'Footsteps on Wood', url: '/sounds/doors/wood-steps.wav', icon: '👣' },
         { id: 'footsteps-stone', name: 'Footsteps on Stone', url: '/sounds/doors/stone-steps.wav', icon: '🦶' },
+        { id: 'echo-steps', name: 'Echoing Steps', url: '/sounds/doors/echo.wav', icon: '👣' },
         { id: 'running', name: 'Running Footsteps', url: '/sounds/doors/running.wav', icon: '🏃' },
         { id: 'stairs', name: 'Climbing Stairs', url: '/sounds/doors/stairs.wav', icon: '🪜' },
         { id: 'stealth-steps', name: 'Stealthy Steps', url: '/sounds/doors/stealth.wav', icon: '🫥' },
@@ -789,13 +792,13 @@ body.light-mode {
 		{ id: 'heavy-breathing', name: 'Heavy Breathing', url: '/sounds/horror/heavy-breathing.wav', icon: '😮‍💨' },
 		{ id: 'scared-breathing', name: 'Scared Breathing', url: '/sounds/horror/scared-breathing.wav', icon: '😮‍💨' },
         { id: 'slow-breathing', name: 'Slow Breathing', url: '/sounds/horror/slow-breathing.mp3', icon: '😮‍💨' },
-        { id: 'light-match', name: 'Light Match', url: '/sounds/horror/light-match.wav', icon: '🔥' },
-		{ id: 'flame-death', name: 'Flame Death', url: '/sounds/horror/flame-death.wav', icon: '🔥' },
+        { id: 'light-match', name: 'Light Match', url: '/sounds/horror/light-match.wav', icon: '🕯️' },
+		{ id: 'flame-death', name: 'Flame Death', url: '/sounds/horror/flame-death.wav', icon: '🕯️' },
         { id: 'unlock-door', name: 'Unlock Door', url: '/sounds/horror/unlock-door.wav', icon: '🗝' },
-		{ id: 'ambience1', name: 'Ambience 1', url: '/sounds/horror/ambience1.wav', icon: '☠︎︎༒︎✞︎🕸𖤐' },
-		{ id: 'ambience2', name: 'Ambience 2', url: '/sounds/horror/ambience2.wav', icon: '☠︎︎༒︎✞︎🕸𖤐' },
-		{ id: 'ambience3', name: 'Ambience 3', url: '/sounds/horror/ambience3.wav', icon: '☠︎︎༒︎✞︎🕸𖤐' },
-        { id: 'chains', name: 'Chains Dragging', url: '/sounds/horror/chains.wav', icon: '⛓️' }
+		{ id: 'horror-ambience1', name: 'Ambience 1', url: '/sounds/horror/ambience1.wav', icon: '☠︎︎༒︎✞︎🕸𖤐' },
+		{ id: 'horror-ambience2', name: 'Ambience 2', url: '/sounds/horror/ambience2.wav', icon: '☠︎︎༒︎✞︎🕸𖤐' },
+		{ id: 'horror-ambience3', name: 'Ambience 3', url: '/sounds/horror/ambience3.wav', icon: '☠︎︎༒︎✞︎🕸𖤐' },
+        { id: 'chains-dragging', name: 'Chains Dragging', url: '/sounds/horror/chains-dragging.wav', icon: '⛓️' }
     ],
     
     'Sci-Fi & Futuristic': [

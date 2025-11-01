@@ -4,7 +4,7 @@ Place MP3 files for the magic category here.
 fireball.wav renamed from Mage FireBall Skill by EminYILDIRIM -- https://freesound.org/s/555519/ -- License: Attribution 4.0
 ice-spell.wav renamed from Ice Magic Arrow_type 01 by lotteria001 -- https://freesound.org/s/709888/ -- License: Creative Commons 0
 magic-sword.wav renamed from Sword_Thunder01.wav by SonoFxAudio -- https://freesound.org/s/649360/ -- License: Attribution 4.0
-lightning-bolt.wav renamed from 05953 huge close thunderstrike.wav by Robinhood76 -- https://freesound.org/s/316850/ -- License: Attribution NonCommercial 4.0
+thunderstrike.wav renamed from 05953 huge close thunderstrike.wav by Robinhood76 -- https://freesound.org/s/316850/ -- License: Attribution NonCommercial 4.0
 healing-spell.wav renamed from Healing Spell by EminYILDIRIM -- https://freesound.org/s/563662/ -- License: Attribution 4.0
 teleport.wav renamed from Teleport-01a.wav by DWOBoyle -- https://freesound.org/s/474180/ -- License: Attribution 4.0
 magic-shield.wav renamed from Magic Shield.wav by spookymodem -- https://freesound.org/s/249818/ -- License: Creative Commons 0
