@@ -379,6 +379,17 @@ body.light-mode {
                     </ul>
                 </div>
                 <div>
+                    <h4 class="font-semibold mb-1">Sound Tags</h4>
+                    <p class="text-slate-300 mb-2">Each sound has colored tags to help you identify its type:</p>
+                    <ul class="list-disc pl-5 text-slate-300">
+                        <li><span class="inline-block px-2 py-1 rounded-full text-xs bg-blue-600 text-blue-100 mr-2">ambient</span>Background sounds that loop continuously</li>
+                        <li><span class="inline-block px-2 py-1 rounded-full text-xs bg-orange-600 text-orange-100 mr-2">event</span>One-time sound effects for specific actions</li>
+                        <li><span class="inline-block px-2 py-1 rounded-full text-xs bg-green-600 text-green-100 mr-2">loop</span>Sounds designed to repeat seamlessly</li>
+                        <li><span class="inline-block px-2 py-1 rounded-full text-xs bg-purple-600 text-purple-100 mr-2">subtle</span>Quiet, atmospheric sounds</li>
+                        <li><span class="inline-block px-2 py-1 rounded-full text-xs bg-red-600 text-red-100 mr-2">creature</span>Animal or monster sounds</li>
+                    </ul>
+                </div>
+                <div>
                     <h4 class="font-semibold mb-1">Quick Actions</h4>
                     <ul class="list-disc pl-5 text-slate-300">
                         <li><strong>Search:</strong> Find sounds by name, icon, or category. Also available in Scenes and Presets modals.</li>
@@ -610,29 +621,29 @@ body.light-mode {
         // Sound Library Configuration - EDIT THIS TO ADD/REMOVE SOUNDS
         const soundLibrary = {
     'Tavern & Inn': [
-        { id: 'tavern-crowd', name: 'Tavern Crowd', url: '/sounds/tavern/crowd.wav', icon: '🍺' },
-        { id: 'tavern-music', name: 'Music', url: '/sounds/tavern/music.flac', icon: '🎵' },
-        { id: 'fireplace', name: 'Fireplace Crackle', url: '/sounds/tavern/fireplace.wav', icon: '🔥' },
-        { id: 'pouring-ale', name: 'Pouring Ale', url: '/sounds/tavern/ale.wav', icon: '🍻' },
-        { id: 'dice-roll', name: 'Dice on Table', url: '/sounds/tavern/dice.mp3', icon: '🎲' },
-        { id: 'chair-scrape', name: 'Chair Scraping', url: '/sounds/tavern/chair.mp3', icon: '🪑' },
-        { id: 'bard-song 1', name: 'Bard Song 1', url: '/sounds/tavern/bard1.wav', icon: '🎤' },
-		{ id: 'bard-song 2', name: 'Bard Song 2', url: '/sounds/tavern/bard2.wav', icon: '🎤' },
-        { id: 'mug-clink', name: 'Mugs Clinking', url: '/sounds/tavern/mugs.wav', icon: '🍺' },
-        { id: 'fiddle-tune', name: 'Fiddle Tune', url: '/sounds/tavern/fiddle.wav', icon: '🎻' },
-        { id: 'tavern-cheer', name: 'Tavern Cheer', url: '/sounds/tavern/cheer.wav', icon: '🥂' },
+        { id: 'tavern-crowd', name: 'Tavern Crowd', url: '/sounds/tavern/crowd.wav', icon: '🍺', tags: ['ambient', 'loop'] },
+        { id: 'tavern-music', name: 'Music', url: '/sounds/tavern/music.flac', icon: '🎵', tags: ['ambient', 'loop'] },
+        { id: 'fireplace', name: 'Fireplace Crackle', url: '/sounds/tavern/fireplace.wav', icon: '🔥', tags: ['ambient', 'loop'] },
+        { id: 'pouring-ale', name: 'Pouring Ale', url: '/sounds/tavern/ale.wav', icon: '🍻', tags: ['event'] },
+        { id: 'dice-roll', name: 'Dice on Table', url: '/sounds/tavern/dice.mp3', icon: '🎲', tags: ['event'] },
+        { id: 'chair-scrape', name: 'Chair Scraping', url: '/sounds/tavern/chair.mp3', icon: '🪑', tags: ['event'] },
+        { id: 'bard-song 1', name: 'Bard Song 1', url: '/sounds/tavern/bard1.wav', icon: '🎤', tags: ['ambient', 'loop'] },
+		{ id: 'bard-song 2', name: 'Bard Song 2', url: '/sounds/tavern/bard2.wav', icon: '🎤', tags: ['ambient', 'loop'] },
+        { id: 'mug-clink', name: 'Mugs Clinking', url: '/sounds/tavern/mugs.wav', icon: '🍺', tags: ['event'] },
+        { id: 'fiddle-tune', name: 'Fiddle Tune', url: '/sounds/tavern/fiddle.wav', icon: '🎻', tags: ['ambient', 'loop'] },
+        { id: 'tavern-cheer', name: 'Tavern Cheer', url: '/sounds/tavern/cheer.wav', icon: '🥂', tags: ['event'] },
     ],
     
     'Combat & Battle': [
-        { id: 'sword-clash', name: 'Sword Clash', url: '/sounds/combat/sword-clash.mp3', icon: '⚔️' },
-        { id: 'sword-swing', name: 'Sword Swing', url: '/sounds/combat/swing.wav', icon: '🗡️' },
-        { id: 'arrow-shot', name: 'Arrow Release', url: '/sounds/combat/arrow.wav', icon: '🏹' },
-        { id: 'shield-block', name: 'Shield Block', url: '/sounds/combat/shield.wav', icon: '🛡️' },
-        { id: 'battle-cry1', name: 'Battle Cry 1', url: '/sounds/combat/cry1.mp3', icon: '😤' },
-		{ id: 'battle-cry2', name: 'Battle Cry 2', url: '/sounds/combat/cry2.wav', icon: '😤' },
-        { id: 'war-drum', name: 'War Drums', url: '/sounds/combat/drums.wav', icon: '🥁' },
-        { id: 'shield-drop', name: 'Shield Drop', url: '/sounds/combat/shield-drop.wav', icon: '🛡️' },
-		{ id: 'dying', name: 'Dying', url: '/sounds/combat/dying.wav', icon: '💀' }
+        { id: 'sword-clash', name: 'Sword Clash', url: '/sounds/combat/sword-clash.mp3', icon: '⚔️', tags: ['event'] },
+        { id: 'sword-swing', name: 'Sword Swing', url: '/sounds/combat/swing.wav', icon: '🗡️', tags: ['event'] },
+        { id: 'arrow-shot', name: 'Arrow Release', url: '/sounds/combat/arrow.wav', icon: '🏹', tags: ['event'] },
+        { id: 'shield-block', name: 'Shield Block', url: '/sounds/combat/shield.wav', icon: '🛡️', tags: ['event'] },
+        { id: 'battle-cry1', name: 'Battle Cry 1', url: '/sounds/combat/cry1.mp3', icon: '😤', tags: ['event'] },
+		{ id: 'battle-cry2', name: 'Battle Cry 2', url: '/sounds/combat/cry2.wav', icon: '😤', tags: ['event'] },
+        { id: 'war-drum', name: 'War Drums', url: '/sounds/combat/drums.wav', icon: '🥁', tags: ['ambient', 'loop'] },
+        { id: 'shield-drop', name: 'Shield Drop', url: '/sounds/combat/shield-drop.wav', icon: '🛡️', tags: ['event'] },
+		{ id: 'dying', name: 'Dying', url: '/sounds/combat/dying.wav', icon: '💀', tags: ['event'] }
     ],
     
     'Magic & Spells': [
@@ -673,17 +684,17 @@ body.light-mode {
     ],
     
     'Forest & Nature': [
-        { id: 'forest-ambience', name: 'Forest Ambience', url: '/sounds/forest/ambience.wav', icon: '🌲' },
-        { id: 'birds', name: 'Bird Calls', url: '/sounds/forest/birds.wav', icon: '🐦' },
-        { id: 'stream', name: 'Babbling Stream', url: '/sounds/forest/stream.wav', icon: '🌊' },
-        { id: 'wind-leaves', name: 'Wind in Leaves', url: '/sounds/forest/wind.wav', icon: '🍃' },
-        { id: 'owl', name: 'Owl Hoot', url: '/sounds/forest/owl.wav', icon: '🦉' },
-        { id: 'rustling', name: 'Bush Rustling', url: '/sounds/forest/rustle.wav', icon: '🌿' },
-        { id: 'crickets', name: 'Night Crickets', url: '/sounds/forest/crickets.wav', icon: '🦗' },
-        { id: 'squirrel', name: 'Squirrel Chatter', url: '/sounds/forest/squirrel.wav', icon: '🐿️' },
-        { id: 'bees', name: 'Bees Nearby', url: '/sounds/forest/bees.wav', icon: '🐝' },
-        { id: 'thunderbirds', name: 'Distant Thunderbirds', url: '/sounds/forest/thunderbirds.wav', icon: '🦅' },
-        { id: 'deer', name: 'Deer Rustle', url: '/sounds/forest/deer.wav', icon: '🦌' }
+        { id: 'forest-ambience', name: 'Forest Ambience', url: '/sounds/forest/ambience.wav', icon: '🌲', tags: ['ambient', 'loop'] },
+        { id: 'birds', name: 'Bird Calls', url: '/sounds/forest/birds.wav', icon: '🐦', tags: ['ambient', 'loop'] },
+        { id: 'stream', name: 'Babbling Stream', url: '/sounds/forest/stream.wav', icon: '🌊', tags: ['ambient', 'loop'] },
+        { id: 'wind-leaves', name: 'Wind in Leaves', url: '/sounds/forest/wind.wav', icon: '🍃', tags: ['ambient', 'loop'] },
+        { id: 'owl', name: 'Owl Hoot', url: '/sounds/forest/owl.wav', icon: '🦉', tags: ['event', 'creature'] },
+        { id: 'rustling', name: 'Bush Rustling', url: '/sounds/forest/rustle.wav', icon: '🌿', tags: ['event', 'subtle'] },
+        { id: 'crickets', name: 'Night Crickets', url: '/sounds/forest/crickets.wav', icon: '🦗', tags: ['ambient', 'loop', 'subtle'] },
+        { id: 'squirrel', name: 'Squirrel Chatter', url: '/sounds/forest/squirrel.wav', icon: '🐿️', tags: ['event', 'creature'] },
+        { id: 'bees', name: 'Bees Nearby', url: '/sounds/forest/bees.wav', icon: '🐝', tags: ['ambient', 'loop'] },
+        { id: 'thunderbirds', name: 'Distant Thunderbirds', url: '/sounds/forest/thunderbirds.wav', icon: '🦅', tags: ['event', 'creature'] },
+        { id: 'deer', name: 'Deer Rustle', url: '/sounds/forest/deer.wav', icon: '🦌', tags: ['event', 'creature', 'subtle'] }
     ],
     
     'Creatures & Monsters': [
@@ -1205,7 +1216,8 @@ function performSearch(query) {
     const matches = [];
     for (const [category, sounds] of Object.entries(soundLibrary)) {
         for (const sound of sounds) {
-            const hay = `${sound.name} ${sound.id} ${category}`.toLowerCase();
+            const tags = getTags(sound).join(' ');
+            const hay = `${sound.name} ${sound.id} ${category} ${tags}`.toLowerCase();
             if (hay.includes(q)) {
                 matches.push({ category, sound });
             }
@@ -1216,7 +1228,7 @@ function performSearch(query) {
             <span class="text-xl">${sound.icon}</span>
             <div class="flex-1 min-w-0">
                 <div class="text-sm font-medium truncate">${sound.name}</div>
-                <div class="text-xs text-slate-400 truncate">${category} • ${getTagsDisplay(sound.name, category)}</div>
+                <div class="text-xs text-slate-400 truncate">${category} • ${getTagsDisplay(sound)}</div>
             </div>
         </button>
     `).join('');
@@ -3022,9 +3034,15 @@ function setSmartMixBeforePlay(soundId, soundName, url, category, icon) {
             return favorites.some(f => f.id === soundId);
         }
 
-        function getTags(soundName, category) {
+        function getTags(sound, category) {
+            // If sound object has tags property, use it
+            if (sound && sound.tags && Array.isArray(sound.tags)) {
+                return sound.tags;
+            }
+            
+            // Fall back to old logic for sounds without tags property
             const tags = [];
-            const name = (soundName || '').toLowerCase();
+            const name = (sound?.name || sound || '').toLowerCase();
             const cat = (category || '').toLowerCase();
             if (/ambience|ambient|hum|stream|waves|wind|crowd/.test(name) || /forest|dungeon|ocean|city|tavern|ambience/.test(cat)) tags.push('ambient');
             if (/scream|impact|slam|clap|gong|glass|break|trap|door/.test(name)) tags.push('event');
@@ -3034,8 +3052,8 @@ function setSmartMixBeforePlay(soundId, soundName, url, category, icon) {
             return tags;
         }
 
-        function getTagsDisplay(soundName, category) {
-            return getTags(soundName, category).join(', ');
+        function getTagsDisplay(sound, category) {
+            return getTags(sound, category).join(', ');
         }
 
         // Switch Tab
@@ -3107,7 +3125,17 @@ const categoriesHtml = Object.keys(soundLibrary).map(category => {
                                     <h3 class="font-medium text-center text-xs leading-tight">${sound.name}</h3>
                                     ${isActive?.isPlaying ? '<div class="mt-1 flex gap-1"><span class="w-1.5 h-2 bg-green-400 animate-pulse"></span><span class="w-1.5 h-3 bg-green-300 animate-pulse"></span><span class="w-1.5 h-2 bg-green-400 animate-pulse"></span></div>' : ''}
                                     <div class="mt-1 flex flex-wrap justify-center gap-1">
-                                        ${getTags(sound.name, category).map(t => `<span class=\"px-1.5 py-0.5 rounded-full text-[10px] bg-slate-700 text-slate-300\">${t}</span>`).join('')}
+                                        ${getTags(sound, category).map(t => {
+                                            const tagColors = {
+                                                'ambient': 'bg-blue-600 text-blue-100',
+                                                'event': 'bg-orange-600 text-orange-100', 
+                                                'loop': 'bg-green-600 text-green-100',
+                                                'subtle': 'bg-purple-600 text-purple-100',
+                                                'creature': 'bg-red-600 text-red-100'
+                                            };
+                                            const colorClass = tagColors[t] || 'bg-slate-700 text-slate-300';
+                                            return `<span class=\"px-1.5 py-0.5 rounded-full text-[10px] ${colorClass}\">${t}</span>`;
+                                        }).join('')}
                                 </div>
                                 </div>
                                 <div class="w-full mt-1 flex gap-1">
