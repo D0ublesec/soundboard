@@ -3118,7 +3118,7 @@ const categoriesHtml = Object.keys(soundLibrary).map(category => {
                                 }" onclick="playSound('${sound.id}', '${sound.name}', '${sound.url}', '${category}', '${sound.icon}')">
                                 <button onclick="event.stopPropagation(); toggleFavorite('${sound.id}', '${sound.name}', '${sound.url}', '${category}', '${sound.icon}')" 
                                     class="absolute top-1 right-1 p-1 hover:bg-slate-700 rounded transition-colors z-10">
-                                    <span class="block text-lg">${favorite ? '⭐' : '☆'}</span>
+                                    <span class="block text-xl">${favorite ? '⭐' : '☆'}</span>
                                 </button>
                                 <div class="flex flex-col items-center mb-2 pt-4">
                                     <span class="text-3xl mb-1">${sound.icon}</span>
