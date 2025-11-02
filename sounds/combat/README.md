@@ -11,4 +11,4 @@ cry2.wav renamed from Male Attack Cry 1.wav by F.M.Audio -- https://freesound.or
 drums.wav renamed from collab-2 war drums 95 bpm.wav by Bliss -- https://freesound.org/s/173318/ -- License: Attribution 4.0
 shield-drop.wav renamed from hammerHit_2 by BBoz87 -- https://freesound.org/s/788236/ -- License: Attribution 4.0
 dying.wav renamed from Male Death Cry 6.wav by F.M.Audio -- https://freesound.org/s/695389/ -- License: Attribution 4.0
- renamed from 
+sharpen-blade.wav renamed from Axe sharpen.wav by nicktermer -- https://freesound.org/s/259548/ -- License: Creative Commons 0
